@@ -46,8 +46,8 @@ export default function dbx<
 
     raw: (
       raw: string,
-      ...bindings: any[]
-    ) => connection.raw(raw, ...bindings),
+      bindings: any[]
+    ) => connection.raw(raw, bindings),
 
     now: () => connection.raw("now()"),
 
@@ -181,8 +181,8 @@ export function withoutPrimaryKey<
 
     raw: (
       raw: string,
-      ...bindings: any[]
-    ) => connection.raw(raw, ...bindings),
+      bindings: any[]
+    ) => connection.raw(raw, bindings),
 
     now: () => connection.raw("now()"),
 
