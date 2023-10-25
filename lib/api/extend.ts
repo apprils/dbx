@@ -14,10 +14,10 @@ declare module "knex" {
       find(columns: string[]): Promise<UnwrapArrayMember<TResult>>;
       find(...columns: string[]): Promise<UnwrapArrayMember<TResult>>;
 
-      selectRaw(raw: string): QueryBuilder<TRecord, TResult>;
+      selectRaw(raw: string): Knex.QueryBuilder<TRecord, TResult>;
 
-      onConflictRaw(columns: string): OnConflictQueryBuilder<TRecord, TResult>;
-      onConflictRaw(columns: string[]): OnConflictQueryBuilder<TRecord, TResult>;
+      onConflictRaw(columns: string): Knex.OnConflictQueryBuilder<TRecord, TResult>;
+      onConflictRaw(columns: string[]): Knex.OnConflictQueryBuilder<TRecord, TResult>;
 
       // sort of pluck but does not add column to select statement.
       // should be LAST statement!
@@ -32,7 +32,7 @@ declare module "knex" {
       countRows(): Promise<number>;
       countDistinctRows(...columns: string[]): Promise<number>;
 
-      satisfies<T>(): QueryBuilder<TRecord, T>;
+      satisfies<T>(): Knex.QueryBuilder<TRecord, T>;
 
     }
   }
