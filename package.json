@@ -57,7 +57,7 @@
     "pub": "npm pub"
   },
   "dependencies": {
-    "@appril/pgts": "^0.2.0",
+    "@appril/pgts": "^0.2.2",
     "date-fns": "^2.30.0",
     "fs-extra": "^11.1.1",
     "glob": "^10.3.10",
@@ -69,12 +69,12 @@
     "prompts": "^2.4.2"
   },
   "devDependencies": {
-    "@appril/dev": "^0.2.0",
-    "@appril/scripts": "^0.2.0",
+    "@appril/dev": "^0.2.2",
+    "@appril/scripts": "^0.2.2",
     "@types/fs-extra": "^11.0.3",
     "@types/lodash": "^4.14.200",
     "@types/mustache": "^4.2.4",
-    "@types/node": "^20.8.8",
+    "@types/node": "^20.8.9",
     "@types/nopt": "^3.0.31",
     "@types/pg": "^8.10.7",
     "@types/prompts": "^2.4.7",
