@@ -14,7 +14,6 @@ export function {{constructorName}}<Ext = unknown>(
   ext?: Ext,
   cfg?: PartialConfig,
 ) {
-  {{#primaryKey}}
   return dbx.default<"{{schema}}.{{name}}", Ext>(
     {
       primaryKey: "{{primaryKey}}",
@@ -24,17 +23,6 @@ export function {{constructorName}}<Ext = unknown>(
     },
     ext
   )
-  {{/primaryKey}}
-  {{^primaryKey}}
-  return dbx.withoutPrimaryKey<"{{schema}}.{{name}}", Ext>(
-    {
-      ...cfg,
-      connection,
-      tableName: "{{schema}}.{{name}}",
-    },
-    ext
-  )
-  {{/primaryKey}}
 }
 {{/views}}
 
