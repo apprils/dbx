@@ -5,11 +5,11 @@ import { Knex } from "knex";
 const table = "{{table}}"
 {{/table}}
 
-export function up(knex: Knex): Promise<void> {
+export function up(knex: Knex) {
   // return knex.schema
 }
 
-export function down(knex: Knex): Promise<void> {
+export function down(knex: Knex) {
   // return knex.schema
 }
 
