@@ -24,7 +24,7 @@ dbxfile="dbx.config.ts"
 temp_dbxfile="var/@dbx.config.js"
 temp_knexfile="var/@dbx.knexfile.ts"
 
-cwf="$(readlink -e "${BASH_SOURCE[0]}")"
+cwf="$(readlink -f "${BASH_SOURCE[0]}")"
 cwd="$(dirname "$cwf")"
 
 no_action="true"
