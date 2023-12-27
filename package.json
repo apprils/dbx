@@ -58,11 +58,11 @@
     "postpub": "mkdir -p var/pub; npm pack --pack-destination var/pub"
   },
   "dependencies": {
-    "@appril/pgts": "^0.2.3",
-    "date-fns": "^2.30.0",
-    "fs-extra": "^11.1.1",
+    "@appril/pgts": "^0.2.4",
+    "date-fns": "^3.0.6",
+    "fs-extra": "^11.2.0",
     "glob": "^10.3.10",
-    "knex": "^3.0.1",
+    "knex": "^3.1.0",
     "lodash": "^4.17.21",
     "mustache": "^4.2.0",
     "nopt": "^7.2.0",
@@ -73,16 +73,17 @@
     "@appril/dev": "^0.2.2",
     "@appril/scripts": "^0.2.2",
     "@types/fs-extra": "^11.0.4",
-    "@types/lodash": "^4.14.201",
+    "@types/lodash": "^4.14.202",
     "@types/mustache": "^4.2.5",
-    "@types/node": "^20.9.0",
+    "@types/node": "^20.10.5",
     "@types/nopt": "^3.0.32",
     "@types/pg": "^8.10.9",
-    "@types/prompts": "^2.4.8",
-    "esbuild": "^0.19.5",
-    "typescript": "^5.2.2"
+    "@types/prompts": "^2.4.9",
+    "esbuild": "^0.19.10",
+    "release-it": "^17.0.1",
+    "typescript": "^5.3.3"
   },
   "peerDependencies": {
-    "knex": "^3.0.1"
+    "knex": "^3.1.0"
   }
 }
