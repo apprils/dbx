@@ -52,8 +52,8 @@ export default async function viewsGenerator(config: GeneratorConfig, {
 
   for (const view of views) {
 
-    const { schema, declaredName } = view
-    const file = pathResolver(schema, declaredName + ".ts")
+    const { schema, name } = view
+    const file = pathResolver(schema, name + ".ts")
 
     if (await fsx.pathExists(file)) {
       continue
@@ -62,7 +62,7 @@ export default async function viewsGenerator(config: GeneratorConfig, {
     await renderToFile(
       file,
       templates.view,
-      view
+      view,
     )
 
   }

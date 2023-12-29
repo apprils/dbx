@@ -1,6 +1,6 @@
 
 {{#tables}}
-export { default as {{declaredName}} } from "./{{declaredName}}";
+export { default as {{declaredName}} } from "./{{name}}";
 {{/tables}}
 
 {{^tables.length}}

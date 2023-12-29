@@ -52,16 +52,18 @@ export default async function tablesGenerator(config: GeneratorConfig, {
 
   for (const table of tables) {
 
-    const { schema, declaredName } = table
-    const file = pathResolver(schema, declaredName + ".ts")
+    const { schema, name } = table
+    const file = pathResolver(schema, name + ".ts")
 
-    if (!await fsx.pathExists(file)) {
-      await renderToFile(
-        file,
-        templates.table,
-        table
-      )
+    if (await fsx.pathExists(file)) {
+      continue
     }
+
+    await renderToFile(
+      file,
+      templates.table,
+      table,
+    )
 
   }
 
