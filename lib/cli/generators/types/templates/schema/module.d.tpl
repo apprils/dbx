@@ -1,7 +1,7 @@
 {{BANNER}}
 
 {{#tables}}
-declare module "dbx:{{schema}}/{{name}}" {
+declare module "@appril/dbx:{{declaredName}}" {
 
   import type { QueryBuilder } from "@appril/dbx";
 
@@ -42,14 +42,14 @@ declare module "dbx:{{schema}}/{{name}}" {
   {{/columns}}
   }
 
-  export type QueryT = QueryBuilder<"{{schema}}.{{name}}">;
+  export type QueryT = QueryBuilder<"{{declaredName}}">;
 
 }
 
 {{/tables}}
 
 {{#views}}
-declare module "dbx:{{schema}}/{{name}}" {
+declare module "@appril/dbx:{{declaredName}}" {
 
   import type { QueryBuilder } from "@appril/dbx";
 
@@ -70,7 +70,7 @@ declare module "dbx:{{schema}}/{{name}}" {
   {{/columns}}
   }
 
-  export type QueryT = QueryBuilder<"{{schema}}.{{name}}">;
+  export type QueryT = QueryBuilder<"{{declaredName}}">;
 
 }
 

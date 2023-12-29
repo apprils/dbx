@@ -12,7 +12,7 @@ export type {
   InsertT as {{insertName}},
   UpdateT as {{updateName}},
   QueryT as {{queryBuilder}},
-} from "dbx:{{schema}}/{{name}}";
+} from "@appril/dbx:{{declaredName}}";
 
 {{/tables}}
 
@@ -20,7 +20,7 @@ export type {
 export type {
   RecordT as {{recordName}},
   QueryT as {{queryBuilder}},
-} from "dbx:{{schema}}/{{name}}";
+} from "@appril/dbx:{{declaredName}}";
 
 {{/views}}
 

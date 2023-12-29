@@ -15,7 +15,7 @@ export function {{constructorName}}<Ext = unknown>(
   cfg?: PartialConfig,
 ) {
   {{#primaryKey}}
-  return dbx.default<"{{schema}}.{{name}}", Ext>(
+  return dbx.default<"{{declaredName}}", Ext>(
     {
       primaryKey: "{{primaryKey}}",
       ...cfg,
@@ -26,7 +26,7 @@ export function {{constructorName}}<Ext = unknown>(
   )
   {{/primaryKey}}
   {{^primaryKey}}
-  return dbx.withoutPrimaryKey<"{{schema}}.{{name}}", Ext>(
+  return dbx.withoutPrimaryKey<"{{declaredName}}", Ext>(
     {
       ...cfg,
       connection,
