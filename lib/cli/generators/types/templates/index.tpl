@@ -1,8 +1,6 @@
 
 {{#schemas}}
-
-export * from "./{{.}}/@enums";
-export * from "./{{.}}/@types";
+export * from "./{{.}}";
 {{/schemas}}
 
 {{^schemas.length}}

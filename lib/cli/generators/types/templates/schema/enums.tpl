@@ -1,3 +1,4 @@
+{{BANNER}}
 
 {{#enums}}
 {{#comment}}/** {{comment}} */{{/comment}}

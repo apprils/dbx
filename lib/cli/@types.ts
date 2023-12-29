@@ -9,10 +9,10 @@ import type {
 export type { TableDeclaration, ViewDeclaration, EnumDeclaration }
 
 export type TypesTemplates = {
-  table?: string;
-  view?: string;
   enums?: string;
-  types?: string;
+  index?: string;
+  knex?: string;
+  moduleDts?: string;
 }
 
 export type TablesTemplates = {
