@@ -27,7 +27,3 @@ export const BANNER = `/**
 * @generated file, do not modify manually!
 */`
 
-export const ONETIME_BANNER = `/**
-* @created automatically at initialization, feel free to modify as needed
-*/`
-

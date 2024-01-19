@@ -9,25 +9,21 @@ import type {
 export type { TableDeclaration, ViewDeclaration, EnumDeclaration }
 
 export type TypesTemplates = {
-  enums?: string;
-  index?: string;
-  knex?: string;
+  knexDts?: string;
   moduleDts?: string;
+  tBase?: string;
+  tExtra?: string;
+  tIndex?: string;
+  tMap?: string;
 }
 
 export type TablesTemplates = {
-  table?: string;
-  constants?: string;
-  constructors?: string;
-  schemaIndex?: string;
+  base?: string;
+  entry?: string;
+  index?: string;
 }
 
-export type ViewsTemplates = {
-  view?: string;
-  constants?: string;
-  constructors?: string;
-  schemaIndex?: string;
-}
+export type ViewsTemplates = TablesTemplates
 
 export type MigrationsTemplates = {
   createTable?: string;
@@ -77,26 +73,29 @@ export type DefaultConfig = Required<
 export type GeneratorConfig = Config & DefaultConfig
 export type MigrationsConfig = Config & DefaultConfig
 
+type TypesRenderContextFactory<Base> = Base & {
+  tBaseModule: string;
+  tExtraModule: string;
+  tIndexModule: string;
+  tMapModule: string;
+}
+
 export type TypesRenderContext = {
-  schema: string;
+  BANNER: string;
   enums: EnumDeclaration[];
-  tables: TableDeclaration[];
-  views: ViewDeclaration[];
+  tables: TypesRenderContextFactory<TableDeclaration>[];
+  views: TypesRenderContextFactory<ViewDeclaration>[];
 }
 
 export type TablesRenderContext = {
-  schema: string;
+  BANNER: string;
   base: string;
   importBase: string;
   typesDir: string;
   tables: TableDeclaration[];
 }
 
-export type ViewsRenderContext = {
-  schema: string;
-  base: string;
-  importBase: string;
-  typesDir: string;
+export type ViewsRenderContext = Omit<TablesRenderContext, "tables"> & {
   views: ViewDeclaration[];
 }
 

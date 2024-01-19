@@ -1,6 +1,5 @@
 
 import { readFile } from "fs/promises";
-import fsx from "fs-extra";
 
 import type {
   GeneratorConfig, TypesRenderContext, TypesTemplates,
@@ -8,25 +7,27 @@ import type {
 } from "../../@types";
 
 import { resolvePath } from "../../base";
-import { BANNER, ONETIME_BANNER, renderToFile } from "../../render";
+import { BANNER, render, renderToFile } from "../../render";
 
-import enumsTpl from "./templates/schema/enums.tpl";
-import indexTpl from "./templates/schema/index.tpl";
-import knexTpl from "./templates/schema/knex.tpl";
-import moduleDtsTpl from "./templates/schema/module.d.tpl";
-import indexInitTpl from "./templates/index.tpl";
+import knexDtsTpl from "./templates/knex.d.tpl";
+import moduleDtsTpl from "./templates/module.d.tpl";
+import tBaseTpl from "./templates/tBase.tpl";
+import tExtraTpl from "./templates/tExtra.tpl";
+import tIndexTpl from "./templates/tIndex.tpl";
+import tMapTpl from "./templates/tMap.tpl";
 
 const defaultTemplates: Required<TypesTemplates> = {
-  enums: enumsTpl,
-  index: indexTpl,
-  knex: knexTpl,
+  knexDts: knexDtsTpl,
   moduleDts: moduleDtsTpl,
+  tBase: tBaseTpl,
+  tExtra: tExtraTpl,
+  tIndex: tIndexTpl,
+  tMap: tMapTpl,
 }
 
 type TemplateName = keyof typeof defaultTemplates
 
 export default async function typesGenerator(config: GeneratorConfig, {
-  schemas,
   tables,
   views,
   enums,
@@ -51,43 +52,51 @@ export default async function typesGenerator(config: GeneratorConfig, {
     templates[name as TemplateName] = await readFile(resolvePath(file), "utf8")
   }
 
-  for (const schema of schemas) {
-    await fsx.emptyDir(pathResolver(schema))
-  }
+  function renderModules<T extends TableDeclaration | ViewDeclaration>(
+    entry: T,
+  ) {
 
-  for (const schema of schemas) {
+    const isTable = "regularColumns" in entry
 
-    const context = {
-      BANNER,
-      schema,
-      enums: enums.filter((e) => e.schema === schema),
-      tables: tables.filter((e) => e.schema === schema),
-      views: views.filter((e) => e.schema === schema),
-    }
+    const renderModule = (
+      tpl: string,
+      ctx?: Record<string, any>,
+    ) => render(tpl, {
+      ...entry,
+      ...ctx,
+      isTable,
+    })
 
-    for (
-      const [ outFile, tplName ] of [
-        [ "enums.ts", "enums" ],
-        [ "index.ts", "index" ],
-        [ "knex.ts", "knex" ],
-        [ "module.d.ts", "moduleDts" ],
-      ] satisfies [ outFile: string, tplName: TemplateName ][]
-    ) {
-
-      await renderToFile<TypesRenderContext>(
-        pathResolver(schema, outFile),
-        templates[tplName],
-        context,
-      )
-
+    return {
+      ...entry,
+      tBaseModule: renderModule(templates.tBase),
+      tExtraModule: renderModule(templates.tExtra),
+      tIndexModule: renderModule(templates.tIndex),
+      tMapModule: renderModule(templates.tMap),
     }
 
   }
 
-  const indexFile = pathResolver("index.ts")
+  const context: TypesRenderContext = {
+    BANNER,
+    enums,
+    tables: tables.map(renderModules<TableDeclaration>),
+    views: views.map(renderModules<ViewDeclaration>),
+  }
 
-  if (!await fsx.pathExists(indexFile)) {
-    await renderToFile(indexFile, ONETIME_BANNER + indexInitTpl, { schemas })
+  for (
+    const [ outFile, tplName ] of [
+      [ "knex.d.ts", "knexDts" ],
+      [ "module.d.ts", "moduleDts" ],
+    ] satisfies [ outFile: string, tplName: TemplateName ][]
+  ) {
+
+    await renderToFile<TypesRenderContext>(
+      pathResolver(outFile),
+      templates[tplName],
+      context,
+    )
+
   }
 
 }

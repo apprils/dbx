@@ -1,12 +1,10 @@
+{{BANNER}}
 
-{{#schemas}}
+{{#views}}
+export { default as {{declaredName}} } from "./{{schema}}/{{name}}";
 
-export * from "./{{.}}/@constants";
-export * from "./{{.}}/@constructors";
-export * from "./{{.}}/@index";
-{{/schemas}}
+{{/views}}
 
-{{^schemas.length}}
+// for cases when there are no views
 export {}
-{{/schemas.length}}
 
