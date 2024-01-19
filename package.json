@@ -34,20 +34,21 @@
     }
   },
   "scripts": {
+    "esbundler": "func() { e=$1; shift; esbuild $e --bundle --platform=node --target=node20 --packages=external --loader:.tpl=text $*; }; func",
     "// ✨ build cli index": "",
-    "build:cli:index": "esbundler lib/cli/index.ts --sourcemap=inline --outdir=pkg/cli",
+    "build:cli:index": "npm run esbundler -- lib/cli/index.ts --sourcemap=inline --outdir=pkg/cli",
     "postbuild:cli:index": "tsc -p lib/cli/tsconfig.json",
     "// ✨ build cli migrations": "",
-    "build:cli:migrations": "esbundler lib/cli/migrations/index.ts --sourcemap=inline --outfile=pkg/cli/migrations.js",
+    "build:cli:migrations": "npm run esbundler -- lib/cli/migrations/index.ts --sourcemap=inline --outfile=pkg/cli/migrations.js",
     "// ✨ build cli generators": "",
-    "build:cli:generators": "esbundler lib/cli/generators/index.ts --sourcemap=inline --outfile=pkg/cli/generators.js",
+    "build:cli:generators": "npm run esbundler -- lib/cli/generators/index.ts --sourcemap=inline --outfile=pkg/cli/generators.js",
     "// ✨ build cli bin": "",
     "build:cli:bin": "cp lib/cli/cli.sh pkg/cli",
     "postbuild:cli:bin": "cp lib/cli/bash_completion.sh pkg/cli",
     "// ✨ build cli": "",
     "build:cli": "npm run build:cli:index && npm run build:cli:generators && npm run build:cli:migrations && npm run build:cli:bin",
     "// ✨ build api": "",
-    "build:api": "esbundler lib/api/index.ts --sourcemap=inline --outdir=pkg/api",
+    "build:api": "npm run esbundler -- lib/api/index.ts --sourcemap=inline --outdir=pkg/api",
     "postbuild:api": "tsc -p lib/api/tsconfig.json",
     "// ✨ build": "",
     "prebuild": "mkdir -p pkg/cli; find pkg -type f -exec rm -fv {} \\;",
@@ -77,8 +78,7 @@
     "prompts": "^2.4.2"
   },
   "devDependencies": {
-    "@appril/dev": "^0.2.4",
-    "@appril/scripts": "^0.2.4",
+    "@appril/tsconfig": "^0.2.2",
     "@types/fs-extra": "^11.0.4",
     "@types/lodash": "^4.14.202",
     "@types/mustache": "^4.2.5",
@@ -87,8 +87,7 @@
     "@types/pg": "^8.10.9",
     "@types/prompts": "^2.4.9",
     "esbuild": "^0.19.11",
-    "release-it": "^17.0.1",
-    "typescript": "^5.3.3"
+    "release-it": "^17.0.1"
   },
   "peerDependencies": {
     "knex": "^3.1.0"
