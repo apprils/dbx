@@ -90,11 +90,6 @@ export type InstanceWithoutPrimaryKey<
 
 export type CompositeReturn<
   TInstance,
-  TTable extends Knex.TableNames = never,
-  TExtra = any
-> =
-& QueryBuilder<TTable>
-& TInstance
-& typeof import("./extend")
-& TExtra
+  TTable extends Knex.TableNames = never
+> = QueryBuilder<TTable> & TInstance & typeof import("./extend")
 

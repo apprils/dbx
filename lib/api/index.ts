@@ -15,11 +15,11 @@ export * from "./@types";
 
 export default function dbx<
   TTable extends Knex.TableNames = never,
-  TExtra = any,
+  TExtra = unknown
 >(
   config: Config,
   extra?: TExtra,
-): CompositeReturn<Instance<TTable>, TTable, TExtra> {
+): CompositeReturn<Instance<TTable>, TTable> & TExtra {
 
   const {
     tableName,
@@ -146,18 +146,18 @@ export default function dbx<
     proxyHandler(tableName, connection, instance)
   )
 
-  return proxy as CompositeReturn<Instance<TTable>, TTable, TExtra>
+  return proxy as CompositeReturn<Instance<TTable>, TTable> & TExtra
 
 }
 
 
 export function withoutPrimaryKey<
   TTable extends Knex.TableNames = never,
-  TExtra = any,
+  TExtra = unknown
 >(
   config: ConfigWithoutPrimaryKey,
   extra?: TExtra,
-): CompositeReturn<InstanceWithoutPrimaryKey<TTable>, TTable, TExtra> {
+): CompositeReturn<InstanceWithoutPrimaryKey<TTable>, TTable> & TExtra {
 
   const {
     tableName,
@@ -253,7 +253,7 @@ export function withoutPrimaryKey<
     proxyHandler(tableName, connection, instance)
   )
 
-  return proxy as CompositeReturn<InstanceWithoutPrimaryKey<TTable>, TTable, TExtra>
+  return proxy as CompositeReturn<InstanceWithoutPrimaryKey<TTable>, TTable> & TExtra
 
 }
 
