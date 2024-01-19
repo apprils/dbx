@@ -1,5 +1,5 @@
 {
-  "version": "0.2.5",
+  "version": "0.2.6",
   "name": "@appril/dbx",
   "description": "Tiny wrapper around KnexJS",
   "author": "Slee Woo",
