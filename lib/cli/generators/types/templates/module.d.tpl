@@ -4,18 +4,16 @@
 {{tBaseModule}}
 {{tExtraModule}}
 {{tIndexModule}}
-{{tMapModule}}
 {{/tables}}
 
 {{#views}}
 {{tBaseModule}}
 {{tExtraModule}}
 {{tIndexModule}}
-{{tMapModule}}
 {{/views}}
 
-{{! intermediate enums module to avoid circular dependencies }}
-{{! when @dbx imports tBase and tBase imports enums from @dbx }}
+{{! intermediate enums module needed to avoid circular dependencies }}
+{{! eg. when dbx namespace imports tBase and tBase imports enums from dbx }}
 declare module "@dbx/enums" {
 
   {{#enums}}
@@ -33,17 +31,21 @@ declare module "@dbx/enums" {
 
 }
 
-declare module "@dbx" {
+declare namespace dbx {
 
   export * from "@dbx/enums";
 
   {{#tables}}
-  export * from "@dbx:{{declaredName}}/tMap";
+  export namespace {{declaredName}} {
+    export * from "@dbx:{{declaredName}}";
+  }
 
   {{/tables}}
 
   {{#views}}
-  export * from "@dbx:{{declaredName}}/tMap";
+  export namespace {{declaredName}} {
+    export * from "@dbx:{{declaredName}}";
+  }
 
   {{/views}}
 

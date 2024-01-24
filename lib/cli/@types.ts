@@ -14,7 +14,6 @@ export type TypesTemplates = {
   tBase?: string;
   tExtra?: string;
   tIndex?: string;
-  tMap?: string;
 }
 
 export type TablesTemplates = {
@@ -77,7 +76,6 @@ type TypesRenderContextFactory<Base> = Base & {
   tBaseModule: string;
   tExtraModule: string;
   tIndexModule: string;
-  tMapModule: string;
 }
 
 export type TypesRenderContext = {

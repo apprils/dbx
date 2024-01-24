@@ -14,7 +14,6 @@ import moduleDtsTpl from "./templates/module.d.tpl";
 import tBaseTpl from "./templates/tBase.tpl";
 import tExtraTpl from "./templates/tExtra.tpl";
 import tIndexTpl from "./templates/tIndex.tpl";
-import tMapTpl from "./templates/tMap.tpl";
 
 const defaultTemplates: Required<TypesTemplates> = {
   knexDts: knexDtsTpl,
@@ -22,7 +21,6 @@ const defaultTemplates: Required<TypesTemplates> = {
   tBase: tBaseTpl,
   tExtra: tExtraTpl,
   tIndex: tIndexTpl,
-  tMap: tMapTpl,
 }
 
 type TemplateName = keyof typeof defaultTemplates
@@ -72,7 +70,6 @@ export default async function typesGenerator(config: GeneratorConfig, {
       tBaseModule: renderModule(templates.tBase),
       tExtraModule: renderModule(templates.tExtra),
       tIndexModule: renderModule(templates.tIndex),
-      tMapModule: renderModule(templates.tMap),
     }
 
   }

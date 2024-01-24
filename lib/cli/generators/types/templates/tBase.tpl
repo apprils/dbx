@@ -2,51 +2,45 @@
 declare module "@dbx:{{declaredName}}/tBase" {
 
   {{#typeImports}}
-  type {{as}} = import("{{from}}").{{import}};
+  import type { {{import}} as {{as}} } from "{{from}}";
   {{/typeImports}}
 
   {{#enumImports}}
-  type {{.}} = import("@dbx/enums").{{.}};
+  import type { {{.}} } from "@dbx/enums";
   {{/enumImports}}
 
   {{! using prefixes to avoid type name collisions }}
   {{! eg. when RecordT imported by typeImports }}
 
   type {{declaredName}}$RecordT = {
-    {{#columns}}
+  {{#columns}}
 
-      {{#comments}}  /** {{.}} */
-      {{/comments}}
-
-      {{name}}: {{declaredType}};
-
-    {{/columns}}
+{{#comments}}    /** {{.}} */
+{{/comments}}
+    {{name}}: {{declaredType}};
+  {{/columns}}
   }
 
   {{#isTable}}
 
   type {{declaredName}}$InsertT = {
-    {{#columns}}
+  {{#columns}}
 
-      {{#comments}}  /** {{.}} */
-      {{/comments}}
-
-      {{^isGenerated}}  {{name}}{{#isOptional}}?{{/isOptional}}: {{declaredType}};
-      {{/isGenerated}}
-
-    {{/columns}}
+{{#comments}}    /** {{.}} */
+{{/comments}}
+    {{^isGenerated}}{{name}}{{#isOptional}}?{{/isOptional}}: {{declaredType}};
+    {{/isGenerated}}
+  {{/columns}}
   }
 
   type {{declaredName}}$UpdateT = {
-    {{#columns}}
+  {{#columns}}
 
-      {{#comments}}  /** {{.}} */
-      {{/comments}}
-
-      {{^isGenerated}}  {{name}}?: {{declaredType}};
-      {{/isGenerated}}
-
-    {{/columns}}
+{{#comments}}    /** {{.}} */
+{{/comments}}
+    {{^isGenerated}}{{name}}?: {{declaredType}};
+    {{/isGenerated}}
+  {{/columns}}
   }
 
   {{/isTable}}
