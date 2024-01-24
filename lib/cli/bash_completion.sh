@@ -14,9 +14,6 @@ _appril_dbx() {
     -c)
       opts=$(ls dbx.*.ts)
       ;;
-    -g)
-      opts="types tables views"
-      ;;
     -m)
       opts="create up down latest rollback list compile"
       ;;

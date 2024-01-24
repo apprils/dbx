@@ -47,11 +47,9 @@ print_usage() {
   echo
   echo "Usage:"
   echo
-  echo "  dbx [-c dbx.config.ts] [-g ...] [-m ...]"
+  echo "  dbx [-c dbx.config.ts] [-g] [-m ...]"
   echo
-  echo "  dbx -g types|tables|views       : Generate given types"
-  echo
-  echo "  dbx -g \\*                       : Generate all types"
+  echo "  dbx -g                          : Generate files"
   echo
   echo "  dbx -m create                   : Create a new migration file"
   echo
@@ -63,7 +61,7 @@ print_usage() {
   echo
   echo "  dbx -m compile                  : Compile migration files without running any migration task"
   echo
-  echo "  dbx                             : Run latest migrations and generate all types"
+  echo "  dbx                             : Run latest migrations and generate files"
   echo
 }
 
@@ -75,16 +73,10 @@ if ! command -v knex >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! command -v jq >/dev/null 2>&1; then
-  print_error "jq not found"
-  echo -e "\tPlease install https://stedolan.github.io/jq/download/\n"
-  exit 1
-fi
+distDir=$(node -e "process.stdout.write(require('./package.json').distDir || '')")
 
-distDir=$(jq -r '.distDir // empty' package.json 2>/dev/null)
-
-if [ -z $distDir ]; then
-  print_error "distDir missing from package.json"
+if [[ -z $distDir ]]; then
+  print_error "package.json supposed to contain top-level distDir key"
   exit 1
 fi
 
@@ -95,24 +87,7 @@ while getopts ":hc:g:m:" opt; do
       ;;
     g )
       no_action="false"
-      case ${OPTARG} in
-        types )
-          generate="types"
-          ;;
-        tables )
-          generate="tables"
-          ;;
-        views )
-          generate="views"
-          ;;
-        "*" )
-          generate="*"
-          ;;
-        * )
-          print_error "Invalid generator type: $OPTARG"
-          exit 1
-          ;;
-      esac
+      generate="true"
       ;;
     m )
       no_action="false"
@@ -174,7 +149,7 @@ shift "$((OPTIND -1))"
 
 if [[ $no_action == "true" ]]; then
   migrate="latest"
-  generate="*"
+  generate="true"
 elif [[ -n $1 ]]; then
   print_error "Invalid arguments: $*"
   print_usage
@@ -215,7 +190,7 @@ compile_migration_files() {
 
 }
 
-if [ "$migrate" == "create" ]; then
+if [[ "$migrate" == "create" ]]; then
 
   $node "$cwd/migrations" \
     --config="$temp_dbxfile" \
@@ -227,7 +202,7 @@ if [ "$migrate" == "create" ]; then
 
 fi
 
-if [ -n "$migrate" ]; then
+if [[ -n "$migrate" ]]; then
 
   compile_migration_files
 
@@ -243,12 +218,7 @@ if [ -n "$migrate" ]; then
 
 fi
 
-if [ -n "$generate" ]; then
-
-  $node "$cwd/generators" \
-    --config="$temp_dbxfile" \
-    --generate="$generate" \
-  ;
-
+if [[ -n "$generate" ]]; then
+  $node "$cwd/generators" --config="$temp_dbxfile"
 fi
 

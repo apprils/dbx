@@ -13,23 +13,16 @@ import type { GeneratorConfig } from "../@types";
 
 const {
   config: configFile,
-  generate,
 } = nopt({
   config: String,
-  generate: String,
 }, {
   c: [ "--config" ],
-  g: [ "--generate" ],
 })
 
 run(async () => {
 
   if (!await fsx.pathExists(configFile)) {
     throw new Error(`Config file does not exists: ${ configFile }`)
-  }
-
-  if (![ "types", "tables", "views", "*" ].includes(generate)) {
-    throw new Error(`Unknown generator: ${ generate }`)
   }
 
   const config: GeneratorConfig = require(resolvePath(configFile)).default
@@ -50,29 +43,17 @@ run(async () => {
     enums,
   } = await pgts(config.connection, config)
 
-  if ([ "types", "*" ].includes(generate)) {
+  process.stdout.write(" 🡺 Generating types... ")
+  await typesGenerator(config, { schemas, tables, views, enums })
+  console.log("Done ✨")
 
-    process.stdout.write(" 🡺 Generating types... ")
-    await typesGenerator(config, { schemas, tables, views, enums })
-    console.log("Done ✨")
+  process.stdout.write(" 🡺 Generating tables... ")
+  await tablesGenerator(config, { schemas, tables })
+  console.log("Done ✨")
 
-  }
-
-  if ([ "tables", "*" ].includes(generate)) {
-
-    process.stdout.write(" 🡺 Generating tables... ")
-    await tablesGenerator(config, { schemas, tables })
-    console.log("Done ✨")
-
-  }
-
-  if ([ "views", "*" ].includes(generate)) {
-
-    process.stdout.write(" 🡺 Generating views... ")
-    await viewsGenerator(config, { schemas, views })
-    console.log("Done ✨")
-
-  }
+  process.stdout.write(" 🡺 Generating views... ")
+  await viewsGenerator(config, { schemas, views })
+  console.log("Done ✨")
 
 })
 
