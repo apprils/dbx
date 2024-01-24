@@ -69,12 +69,6 @@ print_usage() {
 
 PATH="$PATH:node_modules/.bin"
 
-if ! command -v esbundler >/dev/null 2>&1; then
-  print_error "esbundler not found, please install @appril/scripts"
-  echo -e "\t\$ npm add -D @appril/scripts\n"
-  exit 1
-fi
-
 if ! command -v knex >/dev/null 2>&1; then
   print_error "knex not found, please install knex"
   echo -e "\t\$ npm add knex\n"
@@ -194,6 +188,17 @@ fi
 
 knexfile="$distDir/${dbxfile/dbx.config/knexfile}"
 knexfile="${knexfile%.*}.js"
+
+esbundler() {
+  local entrypoint=$1;
+  shift
+  esbuild $entrypoint $* \
+    --bundle \
+    --platform=node \
+    --target=node20 \
+    --packages=external \
+  ;
+}
 
 esbundler "$dbxfile" --sourcemap=inline --outfile="$temp_dbxfile"
 
