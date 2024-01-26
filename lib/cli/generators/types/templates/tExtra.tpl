@@ -1,12 +1,12 @@
 
-declare module "@dbx:{{declaredName}}/tExtra" {
+declare module "{{base}}:{{name}}/tExtra" {
 
   export type TExtraMethod = (
-    this: import("@dbx:{{declaredName}}").QueryT,
+    this: import("{{base}}:{{name}}").QueryT,
     ...a: any[]
-  ) => import("@dbx:{{declaredName}}").QueryT
+  ) => import("{{base}}:{{name}}").QueryT;
 
-  export type TExtra = Record<string, TExtraMethod>
+  export type TExtra = Record<string, TExtraMethod>;
 
 }
 

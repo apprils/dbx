@@ -21,8 +21,8 @@ unset -v \
 node="node --env-file=.env --enable-source-maps"
 
 dbxfile="dbx.config.ts"
-temp_dbxfile="var/@dbx.config.js"
-temp_knexfile="var/@dbx.knexfile.ts"
+temp_dbxfile="var/.cache/dbx.config.js"
+temp_knexfile="var/.cache/dbx.knexfile.ts"
 
 cwf="$(readlink -f "${BASH_SOURCE[0]}")"
 cwd="$(dirname "$cwf")"

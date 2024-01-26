@@ -14,10 +14,11 @@ export type TypesTemplates = {
   tBase?: string;
   tExtra?: string;
   tIndex?: string;
+  enums?: string;
+  index?: string;
 }
 
 export type TablesTemplates = {
-  base?: string;
   entry?: string;
   index?: string;
 }
@@ -71,39 +72,4 @@ export type DefaultConfig = Required<
 
 export type GeneratorConfig = Config & DefaultConfig
 export type MigrationsConfig = Config & DefaultConfig
-
-type TypesRenderContextFactory<Base> = Base & {
-  tBaseModule: string;
-  tExtraModule: string;
-  tIndexModule: string;
-}
-
-export type TypesRenderContext = {
-  BANNER: string;
-  enums: EnumDeclaration[];
-  tables: TypesRenderContextFactory<TableDeclaration>[];
-  views: TypesRenderContextFactory<ViewDeclaration>[];
-}
-
-export type TablesRenderContext = {
-  BANNER: string;
-  base: string;
-  importBase: string;
-  typesDir: string;
-  tables: TableDeclaration[];
-}
-
-export type ViewsRenderContext = Omit<TablesRenderContext, "tables"> & {
-  views: ViewDeclaration[];
-}
-
-export type MigrationsSourceFile = {
-  path: string;
-  const: string;
-}
-
-export type MigrationsSourceRenderContext = MigrationsConfig & {
-  dbxfile: string;
-  files: MigrationsSourceFile[];
-}
 

@@ -4,24 +4,29 @@ import fsx from "fs-extra";
 
 import type {
   GeneratorConfig,
-  ViewDeclaration, ViewsRenderContext, ViewsTemplates,
+  ViewDeclaration, ViewsTemplates,
 } from "../../@types";
 
 import { resolvePath } from "../../base";
 import { BANNER, renderToFile } from "../../render";
 
-import baseTpl from "./templates/base.tpl";
 import entryTpl from "./templates/entry.tpl";
 import indexTpl from "./templates/index.tpl";
 
-const defaultTemplates: Required<ViewsTemplates> = {
-  base: baseTpl,
-  entry: entryTpl,
-  index: indexTpl,
+type RenderContext = {
+  BANNER: string;
+  base: string;
+  importBase: string;
+  views: ViewDeclaration[];
 }
 
 type TemplateName = keyof typeof defaultTemplates
 type TemplateMap = Record<TemplateName, string>
+
+const defaultTemplates: Required<ViewsTemplates> = {
+  entry: entryTpl,
+  index: indexTpl,
+}
 
 export default async function viewsGenerator(config: GeneratorConfig, {
   views,
@@ -33,12 +38,9 @@ export default async function viewsGenerator(config: GeneratorConfig, {
   const {
     base,
     importBase,
-    typesDir,
     viewsDir,
     viewsTemplates,
   } = config
-
-  const pathResolver = (...args: string[]) => resolvePath(base, viewsDir, ...args)
 
   const templates: TemplateMap = { ...defaultTemplates }
 
@@ -49,7 +51,7 @@ export default async function viewsGenerator(config: GeneratorConfig, {
   for (const view of views) {
 
     const { schema, name } = view
-    const file = pathResolver(schema, name + ".ts")
+    const file = resolvePath(base, viewsDir, schema, name + ".ts")
 
     if (await fsx.pathExists(file)) {
       continue
@@ -67,20 +69,14 @@ export default async function viewsGenerator(config: GeneratorConfig, {
     BANNER,
     base,
     importBase,
-    typesDir,
     views,
   }
 
-  await renderToFile<ViewsRenderContext>(
-    pathResolver("base.ts"),
-    templates.base,
-    context,
-  )
-
-  await renderToFile<ViewsRenderContext>(
-    pathResolver("index.ts"),
+  await renderToFile<RenderContext>(
+    resolvePath(base, viewsDir, "index.ts"),
     templates.index,
     context,
+    { format: true },
   )
 
 }

@@ -3,21 +3,21 @@
 declare module "knex/types/tables" {
   interface Tables {
   {{#tables}}
-    "{{declaredName}}": import("knex").Knex.CompositeTableType<
-      import("@dbx:{{declaredName}}").RecordT,
-      import("@dbx:{{declaredName}}").InsertT,
-      import("@dbx:{{declaredName}}").UpdateT,
-      import("@dbx:{{declaredName}}").QueryT
+    "{{base}}:{{name}}": import("knex").Knex.CompositeTableType<
+      import("{{base}}:{{name}}").RecordT,
+      import("{{base}}:{{name}}").InsertT,
+      import("{{base}}:{{name}}").UpdateT,
+      import("{{base}}:{{name}}").QueryT
     >;
   {{/tables}}
   {{#views}}
-    "{{declaredName}}": Knex.CompositeTableType<
-      import("@dbx:{{declaredName}}").RecordT
+    "{{base}}:{{name}}": import("knex").Knex.CompositeTableType<
+      import("{{base}}:{{name}}").RecordT
     >;
   {{/views}}
   }
 }
 
-// needed for declared modules to be treated as augmented rather than ambient
+{{! needed for declared modules to be treated as augmented rather than ambient }}
 export {}
 

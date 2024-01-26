@@ -1,7 +1,5 @@
 
-import {
-  {{constructorName}} as self,
-} from "../base";
+import { {{name}} as self } from "..";
 
 export default self({})
 

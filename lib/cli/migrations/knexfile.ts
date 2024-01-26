@@ -8,7 +8,17 @@ import { BANNER, renderToFile } from "../render";
 
 import defaultTemplate from "./templates/knexfile.tpl";
 
-import type { MigrationsConfig, MigrationsSourceFile, MigrationsSourceRenderContext } from "../@types";
+import type { MigrationsConfig } from "../@types";
+
+type MigrationsSourceFile = {
+  path: string;
+  const: string;
+}
+
+type MigrationsSourceRenderContext = MigrationsConfig & {
+  dbxfile: string;
+  files: MigrationsSourceFile[];
+}
 
 const {
   dbxfile,

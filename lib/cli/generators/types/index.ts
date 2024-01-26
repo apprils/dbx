@@ -2,7 +2,7 @@
 import { readFile } from "fs/promises";
 
 import type {
-  GeneratorConfig, TypesRenderContext, TypesTemplates,
+  GeneratorConfig, TypesTemplates,
   TableDeclaration, ViewDeclaration, EnumDeclaration,
 } from "../../@types";
 
@@ -14,6 +14,28 @@ import moduleDtsTpl from "./templates/module.d.tpl";
 import tBaseTpl from "./templates/tBase.tpl";
 import tExtraTpl from "./templates/tExtra.tpl";
 import tIndexTpl from "./templates/tIndex.tpl";
+import enumsTpl from "./templates/enums.tpl";
+import indexTpl from "./templates/index.tpl";
+
+type TypesRenderContextFactory<Base> = Base & {
+  tBaseModule: string;
+  tExtraModule: string;
+  tIndexModule: string;
+}
+
+type RenderContext = {
+  BANNER: string;
+  base: string;
+  enums: EnumDeclaration[];
+  tables: TypesRenderContextFactory<TableDeclaration>[];
+  views: TypesRenderContextFactory<ViewDeclaration>[];
+}
+
+type ModuleRenderContext = {
+  base: string;
+  isTable: boolean;
+} & (TableDeclaration | ViewDeclaration)
+
 
 const defaultTemplates: Required<TypesTemplates> = {
   knexDts: knexDtsTpl,
@@ -21,6 +43,8 @@ const defaultTemplates: Required<TypesTemplates> = {
   tBase: tBaseTpl,
   tExtra: tExtraTpl,
   tIndex: tIndexTpl,
+  index: indexTpl,
+  enums: enumsTpl,
 }
 
 type TemplateName = keyof typeof defaultTemplates
@@ -42,8 +66,6 @@ export default async function typesGenerator(config: GeneratorConfig, {
     typesTemplates,
   } = config
 
-  const pathResolver = (...args: string[]) => resolvePath(base, typesDir, ...args)
-
   const templates: typeof defaultTemplates = { ...defaultTemplates }
 
   for (const [ name, file ] of Object.entries({ ...typesTemplates })) {
@@ -58,11 +80,12 @@ export default async function typesGenerator(config: GeneratorConfig, {
 
     const renderModule = (
       tpl: string,
-      ctx?: Record<string, any>,
-    ) => render(tpl, {
+      ctx?: Partial<ModuleRenderContext>,
+    ) => render<ModuleRenderContext>(tpl, {
+      base,
+      isTable,
       ...entry,
       ...ctx,
-      isTable,
     })
 
     return {
@@ -74,8 +97,9 @@ export default async function typesGenerator(config: GeneratorConfig, {
 
   }
 
-  const context: TypesRenderContext = {
+  const context: RenderContext = {
     BANNER,
+    base,
     enums,
     tables: tables.map(renderModules<TableDeclaration>),
     views: views.map(renderModules<ViewDeclaration>),
@@ -85,13 +109,16 @@ export default async function typesGenerator(config: GeneratorConfig, {
     const [ outFile, tplName ] of [
       [ "knex.d.ts", "knexDts" ],
       [ "module.d.ts", "moduleDts" ],
+      [ "enums.ts", "enums" ],
+      [ "index.ts", "index" ],
     ] satisfies [ outFile: string, tplName: TemplateName ][]
   ) {
 
-    await renderToFile<TypesRenderContext>(
-      pathResolver(outFile),
+    await renderToFile<RenderContext>(
+      resolvePath(base, typesDir, outFile),
       templates[tplName],
       context,
+      { format: true },
     )
 
   }

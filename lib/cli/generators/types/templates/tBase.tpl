@@ -1,12 +1,12 @@
 
-declare module "@dbx:{{declaredName}}/tBase" {
+declare module "{{base}}:{{name}}/tBase" {
 
   {{#typeImports}}
   import type { {{import}} as {{as}} } from "{{from}}";
   {{/typeImports}}
 
   {{#enumImports}}
-  import type { {{.}} } from "@dbx/enums";
+  import type { {{.}} } from "{{base}}::enums";
   {{/enumImports}}
 
   {{! using prefixes to avoid type name collisions }}
@@ -51,7 +51,7 @@ declare module "@dbx:{{declaredName}}/tBase" {
     {{declaredName}}$InsertT as InsertT,
     {{declaredName}}$UpdateT as UpdateT,
     {{/isTable}}
-  }
+  };
 
 }
 

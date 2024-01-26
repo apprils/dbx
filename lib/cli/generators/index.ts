@@ -11,6 +11,9 @@ import viewsGenerator from "./views";
 
 import type { GeneratorConfig } from "../@types";
 
+import { BANNER, renderToFile } from "../render";
+import baseTpl from "./templates/base.tpl";
+
 const {
   config: configFile,
 } = nopt({
@@ -54,6 +57,19 @@ run(async () => {
   process.stdout.write(" 🡺 Generating views... ")
   await viewsGenerator(config, { schemas, views })
   console.log("Done ✨")
+
+  const context = {
+    BANNER,
+    tables,
+    views,
+  }
+
+  await renderToFile(
+    resolvePath(config.base, "base.ts"),
+    baseTpl,
+    context,
+    { format: true },
+  )
 
 })
 
