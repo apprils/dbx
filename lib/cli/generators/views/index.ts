@@ -1,23 +1,23 @@
-
-import { readFile } from "fs/promises";
-import fsx from "fs-extra";
+import { readFile } from "fs/promises"
+import fsx from "fs-extra"
 
 import type {
   GeneratorConfig,
-  ViewDeclaration, ViewsTemplates,
-} from "../../@types";
+  ViewDeclaration,
+  ViewsTemplates,
+} from "../../@types"
 
-import { resolvePath } from "../../base";
-import { BANNER, renderToFile } from "../../render";
+import { resolvePath } from "../../base"
+import { BANNER, renderToFile } from "../../render"
 
-import entryTpl from "./templates/entry.tpl";
-import indexTpl from "./templates/index.tpl";
+import entryTpl from "./templates/entry.tpl"
+import indexTpl from "./templates/index.tpl"
 
 type RenderContext = {
-  BANNER: string;
-  base: string;
-  importBase: string;
-  views: ViewDeclaration[];
+  BANNER: string
+  base: string
+  importBase: string
+  views: ViewDeclaration[]
 }
 
 type TemplateName = keyof typeof defaultTemplates
@@ -28,28 +28,24 @@ const defaultTemplates: Required<ViewsTemplates> = {
   index: indexTpl,
 }
 
-export default async function viewsGenerator(config: GeneratorConfig, {
-  views,
-}: {
-  schemas: string[];
-  views: ViewDeclaration[];
-}): Promise<void> {
-
-  const {
-    base,
-    importBase,
-    viewsDir,
-    viewsTemplates,
-  } = config
+export default async function viewsGenerator(
+  config: GeneratorConfig,
+  {
+    views,
+  }: {
+    schemas: string[]
+    views: ViewDeclaration[]
+  },
+): Promise<void> {
+  const { base, importBase, viewsDir, viewsTemplates } = config
 
   const templates: TemplateMap = { ...defaultTemplates }
 
-  for (const [ name, file ] of Object.entries({ ...viewsTemplates })) {
+  for (const [name, file] of Object.entries({ ...viewsTemplates })) {
     templates[name as TemplateName] = await readFile(resolvePath(file), "utf8")
   }
 
   for (const view of views) {
-
     const { schema, name } = view
     const file = resolvePath(base, viewsDir, schema, name + ".ts")
 
@@ -57,12 +53,7 @@ export default async function viewsGenerator(config: GeneratorConfig, {
       continue
     }
 
-    await renderToFile(
-      file,
-      templates.entry,
-      view,
-    )
-
+    await renderToFile(file, templates.entry, view)
   }
 
   const context = {
@@ -78,6 +69,4 @@ export default async function viewsGenerator(config: GeneratorConfig, {
     context,
     { format: true },
   )
-
 }
-

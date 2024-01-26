@@ -1,29 +1,25 @@
+import nopt from "nopt"
+import { sortBy } from "lodash"
+import { glob } from "glob"
 
-import nopt from "nopt";
-import { sortBy } from "lodash";
-import { glob } from "glob";
+import { resolvePath } from "../base"
+import { BANNER, renderToFile } from "../render"
 
-import { resolvePath } from "../base";
-import { BANNER, renderToFile } from "../render";
+import defaultTemplate from "./templates/knexfile.tpl"
 
-import defaultTemplate from "./templates/knexfile.tpl";
-
-import type { MigrationsConfig } from "../@types";
+import type { MigrationsConfig } from "../@types"
 
 type MigrationsSourceFile = {
-  path: string;
-  const: string;
+  path: string
+  const: string
 }
 
 type MigrationsSourceRenderContext = MigrationsConfig & {
-  dbxfile: string;
-  files: MigrationsSourceFile[];
+  dbxfile: string
+  files: MigrationsSourceFile[]
 }
 
-const {
-  dbxfile,
-  outfile,
-} = nopt({
+const { dbxfile, outfile } = nopt({
   dbxfile: String,
   outfile: String,
 })
@@ -31,7 +27,6 @@ const {
 export default async function generateKnexfile(
   config: MigrationsConfig,
 ): Promise<void> {
-
   if (!dbxfile) {
     throw new Error("No dbxfile provided")
   }
@@ -40,11 +35,7 @@ export default async function generateKnexfile(
     throw new Error("No outfile provided")
   }
 
-  const {
-    base,
-    migrationDir,
-    migrationTemplates,
-  } = config
+  const { base, migrationDir, migrationTemplates } = config
 
   const matches: string[] = await glob("**/*.ts", {
     cwd: resolvePath(base, migrationDir),
@@ -71,8 +62,6 @@ export default async function generateKnexfile(
       ...config,
       dbxfile: dbxfile.replace(/\.ts$/, ""),
       files: sortBy(files, "path"),
-    }
+    },
   )
-
 }
-

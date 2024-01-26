@@ -1,50 +1,46 @@
+import nopt from "nopt"
+import fsx from "fs-extra"
+import pgts from "@appril/pgts"
 
-import nopt from "nopt";
-import fsx from "fs-extra";
-import pgts from "@appril/pgts";
+import { resolvePath, run } from "../base"
 
-import { resolvePath, run } from "../base";
+import typesGenerator from "./types"
+import tablesGenerator from "./tables"
+import viewsGenerator from "./views"
 
-import typesGenerator from "./types";
-import tablesGenerator from "./tables";
-import viewsGenerator from "./views";
+import type { GeneratorConfig } from "../@types"
 
-import type { GeneratorConfig } from "../@types";
+import { BANNER, renderToFile } from "../render"
+import baseTpl from "./templates/base.tpl"
 
-import { BANNER, renderToFile } from "../render";
-import baseTpl from "./templates/base.tpl";
-
-const {
-  config: configFile,
-} = nopt({
-  config: String,
-}, {
-  c: [ "--config" ],
-})
+const { config: configFile } = nopt(
+  {
+    config: String,
+  },
+  {
+    c: ["--config"],
+  },
+)
 
 run(async () => {
-
-  if (!await fsx.pathExists(configFile)) {
-    throw new Error(`Config file does not exists: ${ configFile }`)
+  if (!(await fsx.pathExists(configFile))) {
+    throw new Error(`Config file does not exists: ${configFile}`)
   }
 
   const config: GeneratorConfig = require(resolvePath(configFile)).default
 
-  for (const requiredParam of [
-    "connection",
-    "base",
-  ] as const) {
+  for (const requiredParam of ["connection", "base"] as const) {
     if (!config[requiredParam]) {
-      throw new Error(`Incomplete config provided, ${ requiredParam } param missing`)
+      throw new Error(
+        `Incomplete config provided, ${requiredParam} param missing`,
+      )
     }
   }
 
-  const {
-    schemas,
-    tables,
-    views,
-    enums,
-  } = await pgts(config.connection, config)
+  const { schemas, tables, views, enums } = await pgts(
+    config.connection,
+    config,
+  )
 
   process.stdout.write(" 🡺 Generating types... ")
   await typesGenerator(config, { schemas, tables, views, enums })
@@ -64,12 +60,7 @@ run(async () => {
     views,
   }
 
-  await renderToFile(
-    resolvePath(config.base, "base.ts"),
-    baseTpl,
-    context,
-    { format: true },
-  )
-
+  await renderToFile(resolvePath(config.base, "base.ts"), baseTpl, context, {
+    format: true,
+  })
 })
-

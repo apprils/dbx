@@ -1,22 +1,19 @@
+import { join } from "path"
 
-import { join } from "path";
+import prompts from "prompts"
+import { Client } from "pg"
+import { format as datetimeFormat } from "date-fns"
 
-import prompts from "prompts";
-import { Client } from "pg";
-import { format as datetimeFormat } from "date-fns";
+import type { MigrationsConfig, MigrationsTemplates } from "../@types"
+import { resolvePath } from "../base"
+import { renderToFile } from "../render"
 
-import type { MigrationsConfig, MigrationsTemplates } from "../@types";
-import { resolvePath } from "../base";
-import { renderToFile } from "../render";
+import createTableTpl from "./templates/createTable.tpl"
+import alterTableTpl from "./templates/alterTable.tpl"
+import dropTableTpl from "./templates/dropTable.tpl"
+import genericTpl from "./templates/generic.tpl"
 
-import createTableTpl from "./templates/createTable.tpl";
-import alterTableTpl from "./templates/alterTable.tpl";
-import dropTableTpl from "./templates/dropTable.tpl";
-import genericTpl from "./templates/generic.tpl";
-
-type Templates = Required<
-  Omit<MigrationsTemplates, "knexfile">
->
+type Templates = Required<Omit<MigrationsTemplates, "knexfile">>
 
 const defaultTemplates: Templates = {
   createTable: createTableTpl,
@@ -28,7 +25,6 @@ const defaultTemplates: Templates = {
 export default async function createMigration(
   config: MigrationsConfig,
 ): Promise<void> {
-
   const {
     connection,
     schemas,
@@ -43,7 +39,6 @@ export default async function createMigration(
   await db.connect()
 
   try {
-
     const query = `
       SELECT table_name as title
         FROM information_schema.tables
@@ -53,7 +48,7 @@ export default async function createMigration(
 
     const { rows: tables } = await db.query({
       text: query,
-      values: [ schemas ],
+      values: [schemas],
     })
 
     function onState(this: any) {
@@ -64,7 +59,6 @@ export default async function createMigration(
     }
 
     const input = await prompts([
-
       {
         type: "select",
         name: "template",
@@ -79,15 +73,15 @@ export default async function createMigration(
       },
 
       {
-        type: (prev) =>  prev === "createTable" ? "text" : "autocomplete",
+        type: (prev) => (prev === "createTable" ? "text" : "autocomplete"),
         name: "table",
         message: "Table Name",
         choices(prev) {
           return prev === "generic"
-            ? [ { title: "[ None ]", value: "@none" }, ...tables ]
+            ? [{ title: "[ None ]", value: "@none" }, ...tables]
             : tables
         },
-        initial: (prev) => prev === "createTable" ? "" : "@none",
+        initial: (prev) => (prev === "createTable" ? "" : "@none"),
         onState(this: any) {
           onState.apply(this)
           this.fallback = { title: this.input, value: this.input }
@@ -115,13 +109,10 @@ export default async function createMigration(
             : formatName(template.replace("Table", ""), table, details)
         },
         validate(value) {
-          return value?.trim().length
-            ? true
-            : "Please insert Migration Name"
+          return value?.trim().length ? true : "Please insert Migration Name"
         },
         onState,
-      }
-
+      },
     ])
 
     const templates = { ...defaultTemplates, ...migrationTemplates }
@@ -129,31 +120,31 @@ export default async function createMigration(
     const template = templates[input.template as keyof Templates]
 
     if (!template) {
-      throw new Error(`Unknown/Empty Template: ${ JSON.stringify(input.template) }`)
+      throw new Error(
+        `Unknown/Empty Template: ${JSON.stringify(input.template)}`,
+      )
     }
 
     const name = formatName(
-      datetimeFormat(new Date, "yyyyMMddHHmmss"),
-      input.name
+      datetimeFormat(new Date(), "yyyyMMddHHmmss"),
+      input.name,
     )
 
-    const outfile = join(base, migrationDir, migrationSubdir || "", name + ".ts")
+    const outfile = join(
+      base,
+      migrationDir,
+      migrationSubdir || "",
+      name + ".ts",
+    )
 
     const table = input.table.replace("@none", "")
 
-    await renderToFile(
-      resolvePath(outfile),
-      template,
-      { table }
-    )
+    await renderToFile(resolvePath(outfile), template, { table })
 
-    console.log(`\x1b[32m✔\x1b[0m ${ outfile } ✨`)
-
-  }
-  finally {
+    console.log(`\x1b[32m✔\x1b[0m ${outfile} ✨`)
+  } finally {
     db.end()
   }
-
 }
 
 function formatName(...chunks: string[]) {
@@ -163,4 +154,3 @@ function formatName(...chunks: string[]) {
     .join("_")
     .replace(/^_|_$/, "")
 }
-

@@ -1,5 +1,5 @@
 
-import type { ConnectionConfig } from "pg";
+import type { ConnectionConfig } from "pg"
 
 import type {
   Config as PgtsConfig,
