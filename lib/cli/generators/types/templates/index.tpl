@@ -8,6 +8,7 @@ export type {
   UpdateT as {{updateName}},
   QueryT  as {{queryBuilder}},
 } from "{{base}}:{{name}}";
+
 {{/tables}}
 
 {{#views}}
@@ -15,5 +16,6 @@ export type {
   RecordT as {{recordName}},
   QueryT  as {{queryBuilder}},
 } from "{{base}}:{{name}}";
+
 {{/views}}
 
