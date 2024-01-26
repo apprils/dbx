@@ -66,8 +66,8 @@
     }
   },
   "dependencies": {
-    "@appril/pgts": "^0.2.5",
-    "date-fns": "^3.2.0",
+    "@appril/pgts": "^0.2.6",
+    "date-fns": "^3.3.1",
     "fs-extra": "^11.2.0",
     "glob": "^10.3.10",
     "knex": "^3.1.0",
@@ -78,16 +78,16 @@
     "prompts": "^2.4.2"
   },
   "devDependencies": {
-    "@appril/tsconfig": "^0.2.2",
+    "@appril/tsconfig": "^0.2.3",
     "@types/fs-extra": "^11.0.4",
     "@types/lodash": "^4.14.202",
     "@types/mustache": "^4.2.5",
-    "@types/node": "^20.11.5",
+    "@types/node": "^20.11.7",
     "@types/nopt": "^3.0.32",
-    "@types/pg": "^8.10.9",
+    "@types/pg": "^8.11.0",
     "@types/prompts": "^2.4.9",
-    "esbuild": "^0.19.11",
-    "release-it": "^17.0.1"
+    "esbuild": "^0.19.12",
+    "release-it": "^17.0.3"
   },
   "peerDependencies": {
     "knex": "^3.1.0"
