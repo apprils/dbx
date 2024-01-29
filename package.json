@@ -47,13 +47,13 @@
     "build:cli:bin": "cp lib/cli/cli.sh pkg/cli",
     "postbuild:cli:bin": "cp lib/cli/bash_completion.sh pkg/cli",
     "// ✨ build cli": "",
-    "build:cli": "npm run build:cli:index && npm run build:cli:generators && npm run build:cli:migrations && npm run build:cli:bin",
+    "build:cli": "set -e; for e in index generators migrations bin; do npm run build:cli:$e; done",
     "// ✨ build api": "",
     "build:api": "npm run esbundler -- lib/api/index.ts --sourcemap=inline --outdir=pkg/api",
     "postbuild:api": "tsc -p lib/api/tsconfig.json",
     "// ✨ build": "",
     "prebuild": "mkdir -p pkg/cli; find pkg -type f -exec rm -fv {} \\;",
-    "build": "for e in api cli; do npm run build:$e; done"
+    "build": "set -e; for e in api cli; do npm run build:$e; done"
   },
   "release-it": {
     "hooks": {
