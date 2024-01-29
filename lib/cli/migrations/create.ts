@@ -1,26 +1,26 @@
-import { join } from "path"
+import { join } from "path";
 
-import prompts from "prompts"
-import { Client } from "pg"
-import { format as datetimeFormat } from "date-fns"
+import prompts from "prompts";
+import { Client } from "pg";
+import { format as datetimeFormat } from "date-fns";
 
-import type { MigrationsConfig, MigrationsTemplates } from "../@types"
-import { resolvePath } from "../base"
-import { renderToFile } from "../render"
+import type { MigrationsConfig, MigrationsTemplates } from "../@types";
+import { resolvePath } from "../base";
+import { renderToFile } from "../render";
 
-import createTableTpl from "./templates/createTable.tpl"
-import alterTableTpl from "./templates/alterTable.tpl"
-import dropTableTpl from "./templates/dropTable.tpl"
-import genericTpl from "./templates/generic.tpl"
+import createTableTpl from "./templates/createTable.tpl";
+import alterTableTpl from "./templates/alterTable.tpl";
+import dropTableTpl from "./templates/dropTable.tpl";
+import genericTpl from "./templates/generic.tpl";
 
-type Templates = Required<Omit<MigrationsTemplates, "knexfile">>
+type Templates = Required<Omit<MigrationsTemplates, "knexfile">>;
 
 const defaultTemplates: Templates = {
   createTable: createTableTpl,
   alterTable: alterTableTpl,
   dropTable: dropTableTpl,
   generic: genericTpl,
-}
+};
 
 export default async function createMigration(
   config: MigrationsConfig,
@@ -32,11 +32,11 @@ export default async function createMigration(
     migrationDir,
     migrationSubdir,
     migrationTemplates,
-  } = config
+  } = config;
 
-  const db = new Client(connection)
+  const db = new Client(connection);
 
-  await db.connect()
+  await db.connect();
 
   try {
     const query = `
@@ -44,17 +44,17 @@ export default async function createMigration(
         FROM information_schema.tables
        WHERE table_schema = ANY($1::text[])
          AND table_type = 'BASE TABLE'
-    `
+    `;
 
     const { rows: tables } = await db.query({
       text: query,
       values: [schemas],
-    })
+    });
 
     function onState(this: any) {
       if (this.aborted) {
-        db.end()
-        process.nextTick(() => process.exit(0))
+        db.end();
+        process.nextTick(() => process.exit(0));
       }
     }
 
@@ -79,14 +79,14 @@ export default async function createMigration(
         choices(prev) {
           return prev === "generic"
             ? [{ title: "[ None ]", value: "@none" }, ...tables]
-            : tables
+            : tables;
         },
         initial: (prev) => (prev === "createTable" ? "" : "@none"),
         onState(this: any) {
-          onState.apply(this)
-          this.fallback = { title: this.input, value: this.input }
+          onState.apply(this);
+          this.fallback = { title: this.input, value: this.input };
           if (this.suggestions?.length === 0) {
-            this.value = this.fallback.value
+            this.value = this.fallback.value;
           }
         },
       },
@@ -106,44 +106,44 @@ export default async function createMigration(
         initial(details, { template, table }) {
           return template === "generic"
             ? formatName(details || table.replace("@none", "") || template)
-            : formatName(template.replace("Table", ""), table, details)
+            : formatName(template.replace("Table", ""), table, details);
         },
         validate(value) {
-          return value?.trim().length ? true : "Please insert Migration Name"
+          return value?.trim().length ? true : "Please insert Migration Name";
         },
         onState,
       },
-    ])
+    ]);
 
-    const templates = { ...defaultTemplates, ...migrationTemplates }
+    const templates = { ...defaultTemplates, ...migrationTemplates };
 
-    const template = templates[input.template as keyof Templates]
+    const template = templates[input.template as keyof Templates];
 
     if (!template) {
       throw new Error(
         `Unknown/Empty Template: ${JSON.stringify(input.template)}`,
-      )
+      );
     }
 
     const name = formatName(
       datetimeFormat(new Date(), "yyyyMMddHHmmss"),
       input.name,
-    )
+    );
 
     const outfile = join(
       base,
       migrationDir,
       migrationSubdir || "",
       name + ".ts",
-    )
+    );
 
-    const table = input.table.replace("@none", "")
+    const table = input.table.replace("@none", "");
 
-    await renderToFile(resolvePath(outfile), template, { table })
+    await renderToFile(resolvePath(outfile), template, { table });
 
-    console.log(`\x1b[32m✔\x1b[0m ${outfile} ✨`)
+    console.log(`\x1b[32m✔\x1b[0m ${outfile} ✨`);
   } finally {
-    db.end()
+    db.end();
   }
 }
 
@@ -152,5 +152,5 @@ function formatName(...chunks: string[]) {
     .filter((e) => e?.trim?.())
     .map((e) => e.trim().replace(/\W+/g, "_"))
     .join("_")
-    .replace(/^_|_$/, "")
+    .replace(/^_|_$/, "");
 }

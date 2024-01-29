@@ -1,4 +1,4 @@
-import type { Knex } from "knex"
+import type { Knex } from "knex";
 
 import type {
   Config,
@@ -10,14 +10,14 @@ import type {
   Returning,
   QueryBuilder,
   CompositeReturn,
-} from "./@types"
+} from "./@types";
 
-import * as extend from "./extend"
-import "./@types.knex"
+import * as extend from "./extend";
+import "./@types.knex";
 
-const customInspectSymbol = Symbol.for("nodejs.util.inspect.custom")
+const customInspectSymbol = Symbol.for("nodejs.util.inspect.custom");
 
-export * from "./@types"
+export * from "./@types";
 
 export default function dbx<
   TTable extends Knex.TableNames = never,
@@ -26,12 +26,12 @@ export default function dbx<
   config: Config,
   extra?: TExtra,
 ): CompositeReturn<Instance<TTable>, TTable> & TExtra {
-  const { tableName, primaryKey } = config
+  const { tableName, primaryKey } = config;
 
   const connection = config.connection.withUserParams({
     tableName,
     primaryKey,
-  })
+  });
 
   const instance: Instance<TTable> = {
     ...extend,
@@ -42,7 +42,7 @@ export default function dbx<
     primaryKey,
 
     get knex(): QueryBuilder<TTable> {
-      return connection(tableName)
+      return connection(tableName);
     },
 
     raw: (raw: string, bindings: any[]) => connection.raw(raw, bindings),
@@ -50,70 +50,73 @@ export default function dbx<
     now: () => connection.raw("now()"),
 
     whereId(id) {
-      return connection(tableName).where(primaryKey, id) as QueryBuilder<TTable>
+      return connection(tableName).where(
+        primaryKey,
+        id,
+      ) as QueryBuilder<TTable>;
     },
 
     async create(data: any, returning: Returning = "*") {
       const [rows] = await connection(tableName)
         .insert(data)
-        .returning(returning)
+        .returning(returning);
 
-      return rows
+      return rows;
     },
 
     async createMany(data: any[], returning: Returning = "*") {
-      const rows = []
+      const rows = [];
 
       for (const entry of data) {
         const [row] = await connection(tableName)
           .insert(entry)
-          .returning(returning)
+          .returning(returning);
 
-        rows.push(row)
+        rows.push(row);
       }
 
-      return rows
+      return rows;
     },
 
     save(id: ID, data: any, returning: Returning = "*") {
       return connection(tableName)
         .where(primaryKey, id)
         .update(data)
-        .returning(returning)
+        .returning(returning);
     },
 
     saveMany(ids: ID[], data: any, returning: Returning = "*") {
       return connection(tableName)
         .whereIn(primaryKey, ids.filter((e) => e) as string[])
         .update(data)
-        .returning(returning)
+        .returning(returning);
     },
 
     batchInsert(rows: any[], batchSize = 1000) {
-      return connection.batchInsert(tableName, rows as any, batchSize)
+      return connection.batchInsert(tableName, rows as any, batchSize);
     },
 
     truncateCascade({ restartIdentity = false }: TruncateOpts = {}) {
       return connection.raw(
         `truncate table ?? ${restartIdentity ? "restart identity" : ""} cascade`,
         tableName,
-      )
+      );
     },
 
     toString: () => tableName,
-  }
+  };
 
   // using inner target to avoid infinite loops
-  const proxyTarget: any = function () {}
+  const proxyTarget: any = function () {};
 
-  proxyTarget[customInspectSymbol] = () => tableName
+  proxyTarget[customInspectSymbol] = () => tableName;
 
   const proxy: unknown = new Proxy(
     proxyTarget,
     proxyHandler(tableName, connection, instance),
-  )
+  );
 
-  return proxy as CompositeReturn<Instance<TTable>, TTable> & TExtra
+  return proxy as CompositeReturn<Instance<TTable>, TTable> & TExtra;
 }
 
 export function withoutPrimaryKey<
@@ -123,11 +126,11 @@ export function withoutPrimaryKey<
   config: ConfigWithoutPrimaryKey,
   extra?: TExtra,
 ): CompositeReturn<InstanceWithoutPrimaryKey<TTable>, TTable> & TExtra {
-  const { tableName } = config
+  const { tableName } = config;
 
   const connection = config.connection.withUserParams({
     tableName,
-  })
+  });
 
   const instance: InstanceWithoutPrimaryKey<TTable> = {
     ...extend,
@@ -137,7 +140,7 @@ export function withoutPrimaryKey<
     tableName,
 
     get knex(): QueryBuilder<TTable> {
-      return connection(tableName)
+      return connection(tableName);
     },
 
     raw: (raw: string, bindings: any[]) => connection.raw(raw, bindings),
@@ -147,27 +150,27 @@ export function withoutPrimaryKey<
     async create(data: any, returning: Returning = "*") {
       const [rows] = await connection(tableName)
         .insert(data)
-        .returning(returning)
+        .returning(returning);
 
-      return rows
+      return rows;
     },
 
     async createMany(data: any[], returning: Returning = "*") {
-      const rows = []
+      const rows = [];
 
       for (const entry of data) {
         const [row] = await connection(tableName)
           .insert(entry)
-          .returning(returning)
+          .returning(returning);
 
-        rows.push(row)
+        rows.push(row);
       }
 
-      return rows
+      return rows;
     },
 
     batchInsert(rows: any[], batchSize = 1000) {
-      return connection.batchInsert(tableName, rows as any, batchSize)
+      return connection.batchInsert(tableName, rows as any, batchSize);
     },
 
     truncateCascade({ restartIdentity = false }: TruncateOpts = {}) {
@@ -178,24 +181,24 @@ export function withoutPrimaryKey<
         cascade
       `,
         tableName,
-      )
+      );
     },
 
     toString: () => tableName,
-  }
+  };
 
   // using inner target to avoid infinite loops
-  const proxyTarget: any = function () {}
+  const proxyTarget: any = function () {};
 
-  proxyTarget[customInspectSymbol] = () => tableName
+  proxyTarget[customInspectSymbol] = () => tableName;
 
   const proxy: unknown = new Proxy(
     proxyTarget,
     proxyHandler(tableName, connection, instance),
-  )
+  );
 
   return proxy as CompositeReturn<InstanceWithoutPrimaryKey<TTable>, TTable> &
-    TExtra
+    TExtra;
 }
 
 function proxyHandler(tableName: string, connection: any, instance: any) {
@@ -204,22 +207,22 @@ function proxyHandler(tableName: string, connection: any, instance: any) {
       if (prop in instance) {
         if (typeof instance[prop] === "function") {
           return function (this: any) {
-            return instance[prop].apply(this, arguments)
-          }
+            return instance[prop].apply(this, arguments);
+          };
         } else {
-          return instance[prop]
+          return instance[prop];
         }
       }
 
-      const conn = connection(tableName)
+      const conn = connection(tableName);
 
       if (typeof conn[prop] === "function") {
         return function (...args: any[]) {
-          return conn[prop](...args)
-        }
+          return conn[prop](...args);
+        };
       } else {
-        return conn[prop]
+        return conn[prop];
       }
     },
-  }
+  };
 }

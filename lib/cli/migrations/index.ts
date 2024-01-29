@@ -1,11 +1,11 @@
-import nopt from "nopt"
-import fsx from "fs-extra"
+import nopt from "nopt";
+import fsx from "fs-extra";
 
-import { resolvePath, run } from "../base"
-import createMigration from "./create"
-import generateKnexfile from "./knexfile"
+import { resolvePath, run } from "../base";
+import createMigration from "./create";
+import generateKnexfile from "./knexfile";
 
-import type { MigrationsConfig } from "../@types"
+import type { MigrationsConfig } from "../@types";
 
 const { config: configFile, action } = nopt(
   {
@@ -16,14 +16,14 @@ const { config: configFile, action } = nopt(
     c: ["--config"],
     a: ["--action"],
   },
-)
+);
 
 run(async () => {
   if (!(await fsx.pathExists(configFile))) {
-    throw new Error(`Config file does not exists: ${configFile}`)
+    throw new Error(`Config file does not exists: ${configFile}`);
   }
 
-  const config: MigrationsConfig = require(resolvePath(configFile)).default
+  const config: MigrationsConfig = require(resolvePath(configFile)).default;
 
   for (const requiredParam of [
     "connection",
@@ -34,15 +34,15 @@ run(async () => {
     if (!config[requiredParam]) {
       throw new Error(
         `Incomplete config provided, ${requiredParam} param missing`,
-      )
+      );
     }
   }
 
   if (action === "create") {
-    return await createMigration(config)
+    return await createMigration(config);
   } else if (action === "knexfile") {
-    return await generateKnexfile(config)
+    return await generateKnexfile(config);
   }
 
-  throw new Error(`Unknown action: ${action}`)
-})
+  throw new Error(`Unknown action: ${action}`);
+});
