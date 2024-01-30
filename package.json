@@ -33,7 +33,6 @@
       "types": "./pkg/cli/index.d.ts"
     }
   },
-  "prettier": "@appril/prettier-config",
   "scripts": {
     "esbundler": "func() { e=$1; shift; esbuild $e --bundle --platform=node --target=node20 --packages=external --loader:.tpl=text $*; }; func",
     "// ✨ build cli index": "",
@@ -55,6 +54,7 @@
     "prebuild": "mkdir -p pkg/cli; find pkg -type f -exec rm -fv {} \\;",
     "build": "set -e; for e in api cli; do npm run build:$e; done"
   },
+  "prettier": "@appril/prettier-config",
   "release-it": {
     "hooks": {
       "before:init": [
