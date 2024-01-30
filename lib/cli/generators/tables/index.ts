@@ -1,4 +1,5 @@
-import { readFile } from "fs/promises";
+import { join } from "path";
+
 import fsx from "fs-extra";
 
 import type {
@@ -7,7 +8,7 @@ import type {
   TablesTemplates,
 } from "../../@types";
 
-import { resolvePath } from "../../base";
+import { resolvePath, filesGeneratorFactory } from "../../base";
 import { BANNER, renderToFile } from "../../render";
 
 import entryTpl from "./templates/entry.tpl";
@@ -42,31 +43,32 @@ export default async function tablesGenerator(
   const templates: TemplateMap = { ...defaultTemplates };
 
   for (const [name, file] of Object.entries({ ...tablesTemplates })) {
-    templates[name as TemplateName] = await readFile(resolvePath(file), "utf8");
+    templates[name as TemplateName] = await fsx.readFile(
+      resolvePath(file),
+      "utf8",
+    );
   }
 
   for (const table of tables) {
     const { schema, name } = table;
     const file = resolvePath(base, tablesDir, schema, name + ".ts");
-
-    if (await fsx.pathExists(file)) {
-      continue;
-    }
-
-    await renderToFile(file, templates.entry, table);
+    await renderToFile(file, templates.entry, table, { overwrite: false });
   }
 
-  const context = {
-    BANNER,
-    base,
-    importBase,
-    tables,
-  };
+  const filesGenerator = filesGeneratorFactory();
 
-  await renderToFile<RenderContext>(
-    resolvePath(base, tablesDir, "index.ts"),
-    templates.index,
-    context,
-    { format: true },
+  await filesGenerator.generateFile<RenderContext>(
+    join(base, tablesDir, "index.ts"),
+    {
+      template: templates.index,
+      context: {
+        BANNER,
+        base,
+        importBase,
+        tables,
+      },
+    },
   );
+
+  await filesGenerator.persistGeneratedFiles(join(base, tablesDir));
 }

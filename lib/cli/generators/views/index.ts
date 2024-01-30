@@ -1,4 +1,5 @@
-import { readFile } from "fs/promises";
+import { join } from "path";
+
 import fsx from "fs-extra";
 
 import type {
@@ -7,7 +8,7 @@ import type {
   ViewsTemplates,
 } from "../../@types";
 
-import { resolvePath } from "../../base";
+import { resolvePath, filesGeneratorFactory } from "../../base";
 import { BANNER, renderToFile } from "../../render";
 
 import entryTpl from "./templates/entry.tpl";
@@ -42,31 +43,32 @@ export default async function viewsGenerator(
   const templates: TemplateMap = { ...defaultTemplates };
 
   for (const [name, file] of Object.entries({ ...viewsTemplates })) {
-    templates[name as TemplateName] = await readFile(resolvePath(file), "utf8");
+    templates[name as TemplateName] = await fsx.readFile(
+      resolvePath(file),
+      "utf8",
+    );
   }
 
   for (const view of views) {
     const { schema, name } = view;
     const file = resolvePath(base, viewsDir, schema, name + ".ts");
-
-    if (await fsx.pathExists(file)) {
-      continue;
-    }
-
-    await renderToFile(file, templates.entry, view);
+    await renderToFile(file, templates.entry, view, { overwrite: false });
   }
 
-  const context = {
-    BANNER,
-    base,
-    importBase,
-    views,
-  };
+  const filesGenerator = filesGeneratorFactory();
 
-  await renderToFile<RenderContext>(
-    resolvePath(base, viewsDir, "index.ts"),
-    templates.index,
-    context,
-    { format: true },
+  await filesGenerator.generateFile<RenderContext>(
+    join(base, viewsDir, "index.ts"),
+    {
+      template: templates.index,
+      context: {
+        BANNER,
+        base,
+        importBase,
+        views,
+      },
+    },
   );
+
+  await filesGenerator.persistGeneratedFiles(join(base, viewsDir));
 }

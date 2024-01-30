@@ -39,9 +39,11 @@ run(async () => {
   }
 
   if (action === "create") {
-    return await createMigration(config);
+    await createMigration(config);
+    return;
   } else if (action === "knexfile") {
-    return await generateKnexfile(config);
+    await generateKnexfile(config);
+    return;
   }
 
   throw new Error(`Unknown action: ${action}`);

@@ -1,16 +1,18 @@
+import { join } from "path";
+
 import nopt from "nopt";
 import fsx from "fs-extra";
 import pgts from "@appril/pgts";
 
-import { resolvePath, run } from "../base";
+import { resolvePath, run, filesGeneratorFactory } from "../base";
 
 import typesGenerator from "./types";
 import tablesGenerator from "./tables";
 import viewsGenerator from "./views";
 
 import type { GeneratorConfig } from "../@types";
+import { BANNER } from "../render";
 
-import { BANNER, renderToFile } from "../render";
 import baseTpl from "./templates/base.tpl";
 
 const { config: configFile } = nopt(
@@ -54,13 +56,16 @@ run(async () => {
   await viewsGenerator(config, { schemas, views });
   console.log("Done ✨");
 
-  const context = {
-    BANNER,
-    tables,
-    views,
-  };
+  const filesGenerator = filesGeneratorFactory();
 
-  await renderToFile(resolvePath(config.base, "base.ts"), baseTpl, context, {
-    format: true,
+  await filesGenerator.generateFile(join(config.base, "base.ts"), {
+    template: baseTpl,
+    context: {
+      BANNER,
+      tables,
+      views,
+    },
   });
+
+  await filesGenerator.persistGeneratedFiles(join(config.base, "base"));
 });

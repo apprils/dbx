@@ -1,4 +1,6 @@
-import { readFile } from "fs/promises";
+import { join } from "path";
+
+import fsx from "fs-extra";
 
 import type {
   GeneratorConfig,
@@ -8,8 +10,8 @@ import type {
   EnumDeclaration,
 } from "../../@types";
 
-import { resolvePath } from "../../base";
-import { BANNER, render, renderToFile } from "../../render";
+import { resolvePath, filesGeneratorFactory } from "../../base";
+import { BANNER, render } from "../../render";
 
 import knexDtsTpl from "./templates/knex.d.tpl";
 import moduleDtsTpl from "./templates/module.d.tpl";
@@ -68,7 +70,10 @@ export default async function typesGenerator(
   const templates: typeof defaultTemplates = { ...defaultTemplates };
 
   for (const [name, file] of Object.entries({ ...typesTemplates })) {
-    templates[name as TemplateName] = await readFile(resolvePath(file), "utf8");
+    templates[name as TemplateName] = await fsx.readFile(
+      resolvePath(file),
+      "utf8",
+    );
   }
 
   function renderModules<T extends TableDeclaration | ViewDeclaration>(
@@ -100,17 +105,22 @@ export default async function typesGenerator(
     views: views.map(renderModules<ViewDeclaration>),
   };
 
+  const filesGenerator = filesGeneratorFactory();
+
   for (const [outFile, tplName] of [
     ["knex.d.ts", "knexDts"],
     ["module.d.ts", "moduleDts"],
     ["enums.ts", "enums"],
     ["index.ts", "index"],
   ] satisfies [outFile: string, tplName: TemplateName][]) {
-    await renderToFile<RenderContext>(
-      resolvePath(base, typesDir, outFile),
-      templates[tplName],
-      context,
-      { format: true },
+    await filesGenerator.generateFile<RenderContext>(
+      join(base, typesDir, outFile),
+      {
+        template: templates[tplName],
+        context,
+      },
     );
   }
+
+  await filesGenerator.persistGeneratedFiles(join(base, typesDir));
 }
