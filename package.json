@@ -34,6 +34,9 @@
     }
   },
   "scripts": {
+    "// ✨ lint": "",
+    "lint": "biome lint ./lib",
+    "// ✨ build": "",
     "esbundler": "func() { e=$1; shift; esbuild $e --bundle --platform=node --target=node20 --packages=external --loader:.tpl=text $*; }; func",
     "// ✨ build cli index": "",
     "build:cli:index": "npm run esbundler -- lib/cli/index.ts --sourcemap=inline --outdir=pkg/cli",
@@ -50,9 +53,9 @@
     "// ✨ build api": "",
     "build:api": "npm run esbundler -- lib/api/index.ts --sourcemap=inline --outdir=pkg/api",
     "postbuild:api": "tsc -p lib/api/tsconfig.json",
-    "// ✨ build": "",
+    "// ✨ build package": "",
     "prebuild": "mkdir -p pkg/cli; find pkg -type f -exec rm -fv {} \\;",
-    "build": "set -e; for e in api cli; do npm run build:$e; done"
+    "build": "set -e; npm run lint; for e in api cli; do npm run build:$e; done"
   },
   "prettier": "@appril/prettier-config",
   "release-it": {
@@ -79,8 +82,8 @@
     "prompts": "^2.4.2"
   },
   "devDependencies": {
-    "@appril/prettier-config": "^0.2.2",
     "@appril/tsconfig": "^0.2.3",
+    "@biomejs/biome": "^1.5.3",
     "@types/fs-extra": "^11.0.4",
     "@types/lodash": "^4.14.202",
     "@types/mustache": "^4.2.5",
@@ -89,7 +92,6 @@
     "@types/pg": "^8.11.0",
     "@types/prompts": "^2.4.9",
     "esbuild": "^0.20.0",
-    "prettier": "^3.2.4",
     "release-it": "^17.0.3"
   },
   "peerDependencies": {
