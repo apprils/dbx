@@ -41,7 +41,9 @@ run(async () => {
   if (action === "create") {
     await createMigration(config);
     return;
-  } else if (action === "knexfile") {
+  }
+
+  if (action === "knexfile") {
     await generateKnexfile(config);
     return;
   }

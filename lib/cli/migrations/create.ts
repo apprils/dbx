@@ -51,6 +51,7 @@ export default async function createMigration(
       values: [schemas],
     });
 
+    // biome-ignore lint:
     function onState(this: any) {
       if (this.aborted) {
         db.end();
@@ -82,6 +83,7 @@ export default async function createMigration(
             : tables;
         },
         initial: (prev) => (prev === "createTable" ? "" : "@none"),
+        // biome-ignore lint:
         onState(this: any) {
           onState.apply(this);
           this.fallback = { title: this.input, value: this.input };
@@ -134,14 +136,14 @@ export default async function createMigration(
       base,
       migrationDir,
       migrationSubdir || "",
-      name + ".ts",
+      `${name}.ts`,
     );
 
     const table = input.table.replace("@none", "");
 
     await renderToFile(resolvePath(outfile), template, { table });
 
-    console.log(`\x1b[32m✔\x1b[0m ${outfile} ✨`);
+    console.log(`\x1b[32m√\x1b[0m ${outfile} ✨`);
   } finally {
     db.end();
   }

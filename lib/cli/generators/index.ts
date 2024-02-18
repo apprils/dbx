@@ -7,13 +7,21 @@ import pgts from "@appril/pgts";
 import { resolvePath, run, filesGeneratorFactory } from "../base";
 
 import typesGenerator from "./types";
-import tablesGenerator from "./tables";
-import viewsGenerator from "./views";
 
-import type { GeneratorConfig } from "../@types";
-import { BANNER } from "../render";
+import type { GeneratorConfig, Templates } from "../@types";
+import { BANNER, renderToFile } from "../render";
 
 import baseTpl from "./templates/base.tpl";
+import indexTpl from "./templates/index.tpl";
+import tableTpl from "./templates/table.tpl";
+
+const defaultTemplates: Required<Templates> = {
+  base: baseTpl,
+  index: indexTpl,
+  table: tableTpl,
+};
+
+type TemplateName = keyof typeof defaultTemplates;
 
 const { config: configFile } = nopt(
   {
@@ -30,6 +38,7 @@ run(async () => {
   }
 
   const config: GeneratorConfig = require(resolvePath(configFile)).default;
+  const { base } = config;
 
   for (const requiredParam of ["connection", "base"] as const) {
     if (!config[requiredParam]) {
@@ -39,33 +48,57 @@ run(async () => {
     }
   }
 
-  const { schemas, tables, views, enums } = await pgts(
+  const { schemas, tables, views, enums, typeImports } = await pgts(
     config.connection,
     config,
   );
 
+  const templates: typeof defaultTemplates = { ...defaultTemplates };
+
+  for (const [name, file] of Object.entries({ ...config.templates })) {
+    templates[name as TemplateName] = await fsx.readFile(
+      resolvePath(file),
+      "utf8",
+    );
+  }
+
   process.stdout.write(" 🡺 Generating types... ");
-  await typesGenerator(config, { schemas, tables, views, enums });
+  await typesGenerator(config, { schemas, tables, views, enums, typeImports });
   console.log("Done ✨");
 
   process.stdout.write(" 🡺 Generating tables... ");
-  await tablesGenerator(config, { schemas, tables });
-  console.log("Done ✨");
 
-  process.stdout.write(" 🡺 Generating views... ");
-  await viewsGenerator(config, { schemas, views });
-  console.log("Done ✨");
+  for (const table of [...tables, ...views]) {
+    const { schema, name } = table;
+    const file = resolvePath(config.base, schema, "tables", `${name}.ts`);
+    await renderToFile(file, templates.table, table, { overwrite: false });
+  }
 
   const filesGenerator = filesGeneratorFactory();
 
-  await filesGenerator.generateFile(join(config.base, "base.ts"), {
-    template: baseTpl,
-    context: {
-      BANNER,
-      tables,
-      views,
-    },
-  });
+  for (const schema of schemas) {
+    const schemaTables = tables.filter((e) => e.schema === schema);
+    const schemaViews = views.filter((e) => e.schema === schema);
 
-  await filesGenerator.persistGeneratedFiles(join(config.base, "base"));
+    const context = {
+      BANNER,
+      base,
+      tables: schemaTables,
+      views: schemaViews,
+    };
+
+    await filesGenerator.generateFile(join(base, schema, "index.ts"), {
+      template: templates.index,
+      context,
+    });
+
+    await filesGenerator.generateFile(join(base, schema, "base.ts"), {
+      template: templates.base,
+      context,
+    });
+  }
+
+  await filesGenerator.persistGeneratedFiles(join(base, "tables"));
+
+  console.log("Done ✨");
 });

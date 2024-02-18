@@ -8,46 +8,20 @@ import type {
   TableDeclaration,
   ViewDeclaration,
   EnumDeclaration,
+  TypeImport,
 } from "../../@types";
 
 import { resolvePath, filesGeneratorFactory } from "../../base";
-import { BANNER, render } from "../../render";
+import { BANNER } from "../../render";
 
 import knexDtsTpl from "./templates/knex.d.tpl";
 import moduleDtsTpl from "./templates/module.d.tpl";
-import tBaseTpl from "./templates/tBase.tpl";
-import tExtraTpl from "./templates/tExtra.tpl";
-import tIndexTpl from "./templates/tIndex.tpl";
-import enumsTpl from "./templates/enums.tpl";
 import indexTpl from "./templates/index.tpl";
-
-type TypesRenderContextFactory<Base> = Base & {
-  tBaseModule: string;
-  tExtraModule: string;
-  tIndexModule: string;
-};
-
-type RenderContext = {
-  BANNER: string;
-  base: string;
-  enums: EnumDeclaration[];
-  tables: TypesRenderContextFactory<TableDeclaration>[];
-  views: TypesRenderContextFactory<ViewDeclaration>[];
-};
-
-type ModuleRenderContext = {
-  base: string;
-  isTable: boolean;
-} & (TableDeclaration | ViewDeclaration);
 
 const defaultTemplates: Required<TypesTemplates> = {
   knexDts: knexDtsTpl,
   moduleDts: moduleDtsTpl,
-  tBase: tBaseTpl,
-  tExtra: tExtraTpl,
-  tIndex: tIndexTpl,
   index: indexTpl,
-  enums: enumsTpl,
 };
 
 type TemplateName = keyof typeof defaultTemplates;
@@ -55,17 +29,20 @@ type TemplateName = keyof typeof defaultTemplates;
 export default async function typesGenerator(
   config: GeneratorConfig,
   {
+    schemas,
     tables,
     views,
     enums,
+    typeImports,
   }: {
     schemas: string[];
     tables: TableDeclaration[];
     views: ViewDeclaration[];
     enums: EnumDeclaration[];
+    typeImports: TypeImport[];
   },
 ): Promise<void> {
-  const { base, typesDir, typesTemplates } = config;
+  const { base, typesTemplates } = config;
 
   const templates: typeof defaultTemplates = { ...defaultTemplates };
 
@@ -76,51 +53,35 @@ export default async function typesGenerator(
     );
   }
 
-  function renderModules<T extends TableDeclaration | ViewDeclaration>(
-    entry: T,
-  ) {
-    const isTable = "regularColumns" in entry;
-
-    const renderModule = (tpl: string, ctx?: Partial<ModuleRenderContext>) =>
-      render<ModuleRenderContext>(tpl, {
-        base,
-        isTable,
-        ...entry,
-        ...ctx,
-      });
-
-    return {
-      ...entry,
-      tBaseModule: renderModule(templates.tBase),
-      tExtraModule: renderModule(templates.tExtra),
-      tIndexModule: renderModule(templates.tIndex),
-    };
-  }
-
-  const context: RenderContext = {
-    BANNER,
-    base,
-    enums,
-    tables: tables.map(renderModules<TableDeclaration>),
-    views: views.map(renderModules<ViewDeclaration>),
-  };
-
   const filesGenerator = filesGeneratorFactory();
 
-  for (const [outFile, tplName] of [
-    ["knex.d.ts", "knexDts"],
-    ["module.d.ts", "moduleDts"],
-    ["enums.ts", "enums"],
-    ["index.ts", "index"],
-  ] satisfies [outFile: string, tplName: TemplateName][]) {
-    await filesGenerator.generateFile<RenderContext>(
-      join(base, typesDir, outFile),
-      {
+  for (const schema of schemas) {
+    const schemaTables = tables.filter((e) => e.schema === schema);
+    const schemaViews = views.filter((e) => e.schema === schema);
+    const schemaTypeImports = typeImports.filter((e) =>
+      e.schemas.includes(schema),
+    );
+
+    const context = {
+      BANNER,
+      base,
+      enums,
+      tables: schemaTables,
+      views: schemaViews,
+      typeImports,
+    };
+
+    for (const [outFile, tplName] of [
+      ["knex.d.ts", "knexDts"],
+      ["module.d.ts", "moduleDts"],
+      ["index.ts", "index"],
+    ] satisfies [outFile: string, tplName: TemplateName][]) {
+      await filesGenerator.generateFile(join(base, schema, "types", outFile), {
         template: templates[tplName],
         context,
-      },
-    );
+      });
+    }
   }
 
-  await filesGenerator.persistGeneratedFiles(join(base, typesDir));
+  await filesGenerator.persistGeneratedFiles(join(base, "types"));
 }

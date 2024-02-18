@@ -19,7 +19,7 @@
   "typesVersions": {
     "*": {
       "cli": [
-        "./pkg/cli/index.d.ts"
+        "./pkg/cli/lib/cli/index.d.ts"
       ]
     }
   },
@@ -30,7 +30,7 @@
     },
     "./cli": {
       "require": "./pkg/cli/index.js",
-      "types": "./pkg/cli/index.d.ts"
+      "types": "./pkg/cli/lib/cli/index.d.ts"
     }
   },
   "scripts": {
@@ -57,15 +57,10 @@
     "prebuild": "mkdir -p pkg/cli; find pkg -type f -exec rm -fv {} \\;",
     "build": "set -e; npm run lint; for e in api cli; do npm run build:$e; done"
   },
-  "prettier": "@appril/prettier-config",
   "release-it": {
     "hooks": {
       "before:init": [
         "npm run build"
-      ],
-      "after:release": [
-        "mkdir -p var/pub",
-        "npm pack --pack-destination var/pub"
       ]
     }
   },

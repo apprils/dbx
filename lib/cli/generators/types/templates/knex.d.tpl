@@ -1,5 +1,7 @@
 {{BANNER}}
 
+/// <reference path="./module.d.ts" />
+
 declare module "knex/types/tables" {
   interface Tables {
   {{#tables}}

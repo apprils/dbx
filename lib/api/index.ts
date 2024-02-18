@@ -45,7 +45,7 @@ export default function dbx<
       return connection(tableName);
     },
 
-    raw: (raw: string, bindings: any[]) => connection.raw(raw, bindings),
+    raw: (raw: string, bindings: unknown[]) => connection.raw(raw, bindings),
 
     now: () => connection.raw("now()"),
 
@@ -56,7 +56,7 @@ export default function dbx<
       ) as QueryBuilder<TTable>;
     },
 
-    async create(data: any, returning: Returning = "*") {
+    async create(data: unknown, returning: Returning = "*") {
       const [rows] = await connection(tableName)
         .insert(data)
         .returning(returning);
@@ -64,7 +64,7 @@ export default function dbx<
       return rows;
     },
 
-    async createMany(data: any[], returning: Returning = "*") {
+    async createMany(data: unknown[], returning: Returning = "*") {
       const rows = [];
 
       for (const entry of data) {
@@ -78,27 +78,31 @@ export default function dbx<
       return rows;
     },
 
-    save(id: ID, data: any, returning: Returning = "*") {
+    save(id: ID, data: unknown, returning: Returning = "*") {
       return connection(tableName)
         .where(primaryKey, id)
         .update(data)
         .returning(returning);
     },
 
-    saveMany(ids: ID[], data: any, returning: Returning = "*") {
+    saveMany(ids: ID[], data: unknown, returning: Returning = "*") {
       return connection(tableName)
         .whereIn(primaryKey, ids.filter((e) => e) as string[])
         .update(data)
         .returning(returning);
     },
 
+    // biome-ignore lint:
     batchInsert(rows: any[], batchSize = 1000) {
+      // biome-ignore lint:
       return connection.batchInsert(tableName, rows as any, batchSize);
     },
 
     truncateCascade({ restartIdentity = false }: TruncateOpts = {}) {
       return connection.raw(
-        `truncate table ?? ${restartIdentity ? "restart identity" : ""} cascade`,
+        `truncate table ?? ${
+          restartIdentity ? "restart identity" : ""
+        } cascade`,
         tableName,
       );
     },
@@ -107,6 +111,7 @@ export default function dbx<
   };
 
   // using inner target to avoid infinite loops
+  // biome-ignore lint:
   const proxyTarget: any = function () {};
 
   proxyTarget[customInspectSymbol] = () => tableName;
@@ -143,11 +148,11 @@ export function withoutPrimaryKey<
       return connection(tableName);
     },
 
-    raw: (raw: string, bindings: any[]) => connection.raw(raw, bindings),
+    raw: (raw: string, bindings: unknown[]) => connection.raw(raw, bindings),
 
     now: () => connection.raw("now()"),
 
-    async create(data: any, returning: Returning = "*") {
+    async create(data: unknown, returning: Returning = "*") {
       const [rows] = await connection(tableName)
         .insert(data)
         .returning(returning);
@@ -155,7 +160,7 @@ export function withoutPrimaryKey<
       return rows;
     },
 
-    async createMany(data: any[], returning: Returning = "*") {
+    async createMany(data: unknown[], returning: Returning = "*") {
       const rows = [];
 
       for (const entry of data) {
@@ -169,7 +174,9 @@ export function withoutPrimaryKey<
       return rows;
     },
 
+    // biome-ignore lint:
     batchInsert(rows: any[], batchSize = 1000) {
+      // biome-ignore lint:
       return connection.batchInsert(tableName, rows as any, batchSize);
     },
 
@@ -188,6 +195,7 @@ export function withoutPrimaryKey<
   };
 
   // using inner target to avoid infinite loops
+  // biome-ignore lint:
   const proxyTarget: any = function () {};
 
   proxyTarget[customInspectSymbol] = () => tableName;
@@ -201,28 +209,30 @@ export function withoutPrimaryKey<
     TExtra;
 }
 
+// biome-ignore lint:
 function proxyHandler(tableName: string, connection: any, instance: any) {
   return {
+    // biome-ignore lint:
     get(_: any, prop: any) {
       if (prop in instance) {
         if (typeof instance[prop] === "function") {
+          // biome-ignore lint:
           return function (this: any) {
+            // biome-ignore lint:
             return instance[prop].apply(this, arguments);
           };
-        } else {
-          return instance[prop];
         }
+        return instance[prop];
       }
 
       const conn = connection(tableName);
 
       if (typeof conn[prop] === "function") {
-        return function (...args: any[]) {
+        return (...args: unknown[]) => {
           return conn[prop](...args);
         };
-      } else {
-        return conn[prop];
       }
+      return conn[prop];
     },
   };
 }

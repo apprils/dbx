@@ -49,7 +49,7 @@ export default async function generateKnexfile(
   for (const path of matches) {
     files.push({
       path: path.replace(/\.ts$/, ""),
-      const: "$" + path.replace(/\W/g, "_"),
+      const: ["$", path.replace(/\W/g, "_")].join(""),
     });
   }
 

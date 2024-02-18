@@ -2,7 +2,11 @@ import type { Knex } from "knex";
 import knex from "knex";
 
 // same as `first` but throws error if no record found
-export const find = async function (this: Knex.QueryBuilder, ...args: any[]) {
+export const find = async function (
+  this: Knex.QueryBuilder,
+  ...args: unknown[]
+) {
+  // @ts-ignore
   const row = await this.first(...args);
 
   if (row) {
@@ -35,7 +39,7 @@ export const pick = async function (this: Knex.QueryBuilder, column: string) {
   return result[column];
 };
 
-export const minValue = async function <TResult = any>(
+export const minValue = async function <TResult = unknown>(
   this: Knex.QueryBuilder,
   column: string | Knex.Raw,
 ): Promise<TResult | undefined> {
@@ -43,7 +47,7 @@ export const minValue = async function <TResult = any>(
   return min;
 };
 
-export const maxValue = async function <TResult = any>(
+export const maxValue = async function <TResult = unknown>(
   this: Knex.QueryBuilder,
   column: string | Knex.Raw,
 ): Promise<TResult | undefined> {
@@ -98,17 +102,24 @@ export const satisfies = function (this: Knex.QueryBuilder) {
 knex.QueryBuilder.extend("find", find);
 
 knex.QueryBuilder.extend("selectRaw", selectRaw);
-knex.QueryBuilder.extend("onConflictRaw", <any>onConflictRaw);
+// @ts-ignore
+knex.QueryBuilder.extend("onConflictRaw", onConflictRaw);
 
 knex.QueryBuilder.extend("pick", pick);
 
-knex.QueryBuilder.extend("minValue", <any>minValue);
-knex.QueryBuilder.extend("maxValue", <any>maxValue);
+// @ts-ignore
+knex.QueryBuilder.extend("minValue", minValue);
+// @ts-ignore
+knex.QueryBuilder.extend("maxValue", maxValue);
 
-knex.QueryBuilder.extend("sumValue", <any>sumValue);
-knex.QueryBuilder.extend("avgValue", <any>avgValue);
+// @ts-ignore
+knex.QueryBuilder.extend("sumValue", sumValue);
+// @ts-ignore
+knex.QueryBuilder.extend("avgValue", avgValue);
 
-knex.QueryBuilder.extend("countRows", <any>countRows);
-knex.QueryBuilder.extend("countDistinctRows", <any>countDistinctRows);
+// @ts-ignore
+knex.QueryBuilder.extend("countRows", countRows);
+// @ts-ignore
+knex.QueryBuilder.extend("countDistinctRows", countDistinctRows);
 
 knex.QueryBuilder.extend("satisfies", satisfies);
