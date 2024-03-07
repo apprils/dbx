@@ -12,16 +12,7 @@
     "pkg/*"
   ],
   "bin": {
-    "appril-dbx": "pkg/cli/cli.sh"
-  },
-  "// ✨ seems exports.types not fully supported by all editors yet?": "",
-  "types": "./pkg/api/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "cli": [
-        "./pkg/cli/lib/cli/index.d.ts"
-      ]
-    }
+    "appril-dbx": "pkg/cli.sh"
   },
   "exports": {
     ".": {
@@ -30,32 +21,24 @@
     },
     "./cli": {
       "require": "./pkg/cli/index.js",
-      "types": "./pkg/cli/lib/cli/index.d.ts"
+      "types": "./pkg/cli/index.d.ts"
     }
   },
   "scripts": {
-    "// ✨ lint": "",
+    "// ✨ linters": "",
     "lint": "biome lint ./lib",
-    "// ✨ build": "",
-    "esbundler": "func() { e=$1; shift; esbuild $e --bundle --platform=node --target=node20 --packages=external --loader:.tpl=text $*; }; func",
-    "// ✨ build cli index": "",
-    "build:cli:index": "npm run esbundler -- lib/cli/index.ts --sourcemap=inline --outdir=pkg/cli",
-    "postbuild:cli:index": "tsc -p lib/cli/tsconfig.json",
-    "// ✨ build cli migrations": "",
-    "build:cli:migrations": "npm run esbundler -- lib/cli/migrations/index.ts --sourcemap=inline --outfile=pkg/cli/migrations.js",
-    "// ✨ build cli generators": "",
-    "build:cli:generators": "npm run esbundler -- lib/cli/generators/index.ts --sourcemap=inline --outfile=pkg/cli/generators.js",
-    "// ✨ build cli bin": "",
-    "build:cli:bin": "cp lib/cli/cli.sh pkg/cli",
-    "postbuild:cli:bin": "cp lib/cli/bash_completion.sh pkg/cli",
-    "// ✨ build cli": "",
-    "build:cli": "set -e; for e in index generators migrations bin; do npm run build:cli:$e; done",
+    "// ✨ types": "",
+    "tsc": "tsc --emitDeclarationOnly",
+    "// ✨ builders": "",
+    "esbuilder": "set -e; func() { e=$1; shift; esbuild lib/$e.ts --outfile=pkg/$e.js --bundle --platform=node --target=node20 --packages=external --loader:.tpl=text --sourcemap=inline $*; }; func",
     "// ✨ build api": "",
-    "build:api": "npm run esbundler -- lib/api/index.ts --sourcemap=inline --outdir=pkg/api",
-    "postbuild:api": "tsc -p lib/api/tsconfig.json",
-    "// ✨ build package": "",
-    "prebuild": "mkdir -p pkg/cli; find pkg -type f -exec rm -fv {} \\;",
-    "build": "set -e; npm run lint; for e in api cli; do npm run build:$e; done"
+    "build:api": "npm run esbuilder api/index",
+    "// ✨ build cli": "",
+    "build:cli": "for e in cli/index cli/generators/index cli/migrations/index; do npm run esbuilder $e; done",
+    "postbuild:cli": "for e in cli.sh bash_completion.sh; do cp lib/cli/$e pkg; done",
+    "// ✨ build": "",
+    "prebuild": "mkdir -p pkg; find pkg -type f -exec rm -fv {} \\;",
+    "build": "set -e; npm run lint; npm run tsc; for e in api cli; do npm run build:$e; done"
   },
   "release-it": {
     "hooks": {
@@ -65,7 +48,7 @@
     }
   },
   "dependencies": {
-    "@appril/pgts": "^0.2.8",
+    "@appril/pgts": "^0.2.9",
     "date-fns": "^3.3.1",
     "fs-extra": "^11.2.0",
     "glob": "^10.3.10",
@@ -77,16 +60,16 @@
     "prompts": "^2.4.2"
   },
   "devDependencies": {
-    "@appril/tsconfig": "^0.2.3",
+    "@appril/tsconfig": "^0.2.5",
     "@biomejs/biome": "^1.5.3",
     "@types/fs-extra": "^11.0.4",
     "@types/lodash": "^4.14.202",
     "@types/mustache": "^4.2.5",
-    "@types/node": "^20.11.19",
+    "@types/node": "^20.11.25",
     "@types/nopt": "^3.0.32",
-    "@types/pg": "^8.11.0",
+    "@types/pg": "^8.11.2",
     "@types/prompts": "^2.4.9",
-    "esbuild": "^0.20.0",
+    "esbuild": "^0.20.1",
     "release-it": "^17.1.1"
   },
   "peerDependencies": {

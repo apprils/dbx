@@ -16,7 +16,7 @@ unset -v \
   distDir \
   next \
   node \
-;
+  ;
 
 node="node --env-file=.env --enable-source-maps"
 
@@ -33,17 +33,17 @@ migrate=""
 migrate_args=""
 next=""
 
-print_error() {
+function print_error() {
   echo
   echo -e "\e[31m✖\e[0m $*"
   echo
 }
 
-print_success() {
+function print_success() {
   echo -e "\e[32m✔\e[0m $*"
 }
 
-print_usage() {
+function print_usage() {
   echo
   echo "Usage:"
   echo
@@ -139,9 +139,9 @@ while getopts ":hc:g:m:" opt; do
     \? )
       print_error "Invalid option: -$OPTARG"
       exit 1
-     ;;
+      ;;
     * )
-     ;;
+      ;;
   esac
 done
 
@@ -164,7 +164,7 @@ fi
 knexfile="$distDir/${dbxfile/dbx.config/knexfile}"
 knexfile="${knexfile%.*}.js"
 
-esbundler() {
+function esbundler() {
   local entrypoint=$1;
   shift
   esbuild $entrypoint $* \
@@ -172,19 +172,19 @@ esbundler() {
     --platform=node \
     --target=node20 \
     --packages=external \
-  ;
+    ;
 }
 
 esbundler "$dbxfile" --sourcemap=inline --outfile="$temp_dbxfile"
 
-compile_migration_files() {
+function compile_migration_files() {
 
-  $node "$cwd/migrations" \
+  $node "$cwd/cli/migrations" \
     --config="$temp_dbxfile" \
     --action="knexfile" \
     --dbxfile="$dbxfile" \
     --outfile="$temp_knexfile" \
-  ;
+    ;
 
   esbundler "$temp_knexfile" --sourcemap=inline --outfile="$knexfile"
 
@@ -192,10 +192,10 @@ compile_migration_files() {
 
 if [[ "$migrate" == "create" ]]; then
 
-  $node "$cwd/migrations" \
+  $node "$cwd/cli/migrations" \
     --config="$temp_dbxfile" \
     --action="create" \
-  ;
+    ;
 
   compile_migration_files
   exit $?
@@ -214,11 +214,11 @@ if [[ -n "$migrate" ]]; then
   $node "$(which knex)" --knexfile "$knexfile" \
     migrate:$migrate \
     $migrate_args \
-  ;
+    ;
 
 fi
 
 if [[ -n "$generate" ]]; then
-  $node "$cwd/generators" --config="$temp_dbxfile"
+  $node "$cwd/cli/generators" --config="$temp_dbxfile"
 fi
 
