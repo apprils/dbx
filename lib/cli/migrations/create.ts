@@ -1,4 +1,4 @@
-import { join } from "path";
+import { join } from "node:path";
 
 import prompts from "prompts";
 import { Client } from "pg";

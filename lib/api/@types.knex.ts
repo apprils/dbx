@@ -44,4 +44,4 @@ declare module "knex" {
 }
 
 // needed for declared modules to be treated as augmented rather than ambient
-export {};
+export type {};
