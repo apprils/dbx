@@ -1,5 +1,5 @@
 
-import { Knex } from "knex";
+import type { Knex } from "knex";
 {{#table}}
 
 const table = "{{table}}"
