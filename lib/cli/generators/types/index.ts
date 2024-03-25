@@ -1,5 +1,3 @@
-import { join } from "node:path";
-
 import fsx from "fs-extra";
 
 import type {
@@ -11,8 +9,8 @@ import type {
   TypeImport,
 } from "../../@types";
 
-import { resolvePath, filesGeneratorFactory } from "../../base";
-import { BANNER } from "../../render";
+import { resolvePath } from "../../base";
+import { BANNER, renderToFile } from "../../render";
 
 import knexDtsTpl from "./templates/knex.d.tpl";
 import moduleDtsTpl from "./templates/module.d.tpl";
@@ -53,9 +51,8 @@ export default async function typesGenerator(
     );
   }
 
-  const filesGenerator = filesGeneratorFactory();
-
   for (const schema of schemas) {
+    const schemaEnums = enums.filter((e) => e.schema === schema);
     const schemaTables = tables.filter((e) => e.schema === schema);
     const schemaViews = views.filter((e) => e.schema === schema);
     const schemaTypeImports = typeImports.filter((e) =>
@@ -65,10 +62,10 @@ export default async function typesGenerator(
     const context = {
       BANNER,
       base,
-      enums,
+      enums: schemaEnums,
       tables: schemaTables,
       views: schemaViews,
-      typeImports,
+      typeImports: schemaTypeImports,
     };
 
     for (const [outFile, tplName] of [
@@ -76,12 +73,11 @@ export default async function typesGenerator(
       ["module.d.ts", "moduleDts"],
       ["index.ts", "index"],
     ] satisfies [outFile: string, tplName: TemplateName][]) {
-      await filesGenerator.generateFile(join(base, schema, "types", outFile), {
-        template: templates[tplName],
+      await renderToFile(
+        resolvePath(base, schema, "types", outFile),
+        templates[tplName],
         context,
-      });
+      );
     }
   }
-
-  await filesGenerator.persistGeneratedFiles(join(base, "types"));
 }

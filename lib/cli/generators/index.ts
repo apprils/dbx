@@ -1,10 +1,8 @@
-import { join } from "node:path";
-
 import nopt from "nopt";
 import fsx from "fs-extra";
 import pgts from "@appril/pgts";
 
-import { resolvePath, run, filesGeneratorFactory } from "../base";
+import { resolvePath, run } from "../base";
 
 import typesGenerator from "./types";
 
@@ -74,8 +72,6 @@ run(async () => {
     await renderToFile(file, templates.table, table, { overwrite: false });
   }
 
-  const filesGenerator = filesGeneratorFactory();
-
   for (const schema of schemas) {
     const schemaTables = tables.filter((e) => e.schema === schema);
     const schemaViews = views.filter((e) => e.schema === schema);
@@ -87,18 +83,18 @@ run(async () => {
       views: schemaViews,
     };
 
-    await filesGenerator.generateFile(join(base, schema, "index.ts"), {
-      template: templates.index,
+    await renderToFile(
+      resolvePath(base, schema, "index.ts"),
+      templates.index,
       context,
-    });
+    );
 
-    await filesGenerator.generateFile(join(base, schema, "base.ts"), {
-      template: templates.base,
+    await renderToFile(
+      resolvePath(base, schema, "base.ts"),
+      templates.base,
       context,
-    });
+    );
   }
-
-  await filesGenerator.persistGeneratedFiles(join(base, "tables"));
 
   console.log("Done ✨");
 });
