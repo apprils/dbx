@@ -1,3 +1,3 @@
-import { {{name}} as self } from "../base";
+import { {{name}} as base } from "../base";
 
-export default self({})
+export default base({})
