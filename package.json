@@ -37,8 +37,11 @@
     "build:cli": "for e in cli/index cli/generators/index cli/migrations/index; do npm run esbuilder $e; done",
     "postbuild:cli": "for e in cli.sh bash_completion.sh; do cp lib/cli/$e pkg; done",
     "// ✨ build": "",
-    "prebuild": "mkdir -p pkg; find pkg -type f -exec rm -fv {} \\;",
-    "build": "set -e; npm run lint; npm run tsc; for e in api cli; do npm run build:$e; done"
+    "prebuild:000": "mkdir -p pkg; find pkg -type f -exec rm -fv {} \\;",
+    "prebuild:001": "npm run lint",
+    "prebuild:002": "npm run tsc",
+    "prebuild": "set -e; for i in 0 1 2; do npm run prebuild:00${i}; done",
+    "build": "set -e; for e in api cli; do npm run build:$e; done"
   },
   "release-it": {
     "hooks": {
